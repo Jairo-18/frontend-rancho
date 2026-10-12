@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+/*
+ * Sistema de diseño del Rancho Porvenir (CONTEXT §7): rústico, ecológico,
+ * cálido y artesanal. Paleta de la finca + variantes oscuras para que el texto
+ * cumpla contraste AA sobre el crema papel (arcilla y musgo puros no llegan a
+ * 4.5:1 en texto pequeño; se usan solo en decoración y textos grandes).
+ */
+@theme {
+  --color-bosque: #2f4a2b;
+  --color-bosque-900: #1e3019;
+  --color-musgo: #6b8e4e;
+  --color-musgo-700: #4d6a37;
+  --color-madera: #7a5230;
+  --color-madera-900: #4f341d;
+  --color-arcilla: #b5653a;
+  --color-arcilla-700: #8f4b27;
+  --color-papel: #f4ebdc;
+  --color-papel-claro: #faf5ec;
+  --color-arena: #e3d3b8;
+  --color-tinta: #2b2118;
+  --color-tinta-suave: #5a4a3b;
+
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+  --font-hand: var(--font-caveat), cursive;
+
+  --shadow-calida: 0 12px 32px -14px rgb(79 52 29 / 0.38), 0 2px 6px -2px rgb(79 52 29 / 0.12);
+  --shadow-calida-lg: 0 24px 48px -18px rgb(79 52 29 / 0.45), 0 4px 10px -4px rgb(79 52 29 / 0.15);
+
+  --radius-organico: 1.75rem 1.25rem 1.9rem 1.4rem;
+
+  --animate-fade-up: fade-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-papel);
+    color: var(--color-tinta);
+    font-family: var(--font-sans);
+    /* Papel con grano: ruido SVG muy sutil, sin imágenes externas. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.48 0 0 0 0 0.32 0 0 0 0 0.19 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    color: var(--color-bosque);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Foco visible siempre (teclado), con el color de la marca. */
+  :focus-visible {
+    outline: 3px solid var(--color-arcilla);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  ::selection {
+    background: var(--color-musgo);
+    color: var(--color-papel-claro);
+  }
+}
+
+@layer components {
+  /* Tarjeta de papel kraft con borde cálido. */
+  .card-papel {
+    background-color: var(--color-papel-claro);
+    border: 1px solid color-mix(in srgb, var(--color-madera) 18%, transparent);
+    border-radius: var(--radius-organico);
+    box-shadow: var(--shadow-calida);
+  }
+
+  /* Veta de madera sutil para franjas y pies de página. */
+  .veta-madera {
+    background-color: var(--color-madera-900);
+    background-image:
+      repeating-linear-gradient(
+        92deg,
+        rgb(255 255 255 / 0.025) 0 2px,
+        transparent 2px 9px,
+        rgb(0 0 0 / 0.04) 9px 10px,
+        transparent 10px 23px
+      ),
+      repeating-linear-gradient(
+        88deg,
+        transparent 0 31px,
+        rgb(255 255 255 / 0.02) 31px 33px
+      );
+  }
+
+  /* Sello artesanal: insignias "Jacuzzi", "Entre semana", "Fin de semana". */
+  .sello {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    border: 1.5px dashed currentColor;
+    border-radius: 999px;
+    padding: 0.2rem 0.75rem;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow: inset 0 0 0 3px color-mix(in srgb, currentColor 10%, transparent);
+  }
+}
+
+/* Aparición al hacer scroll (componente <Reveal>). */
+.reveal {
+  opacity: 0;
+}
+.reveal[data-visible="true"] {
+  animation: var(--animate-fade-up);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+  }
+  .reveal[data-visible="true"] {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
