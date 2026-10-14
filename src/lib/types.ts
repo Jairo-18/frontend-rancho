@@ -4,6 +4,8 @@ export type RoomLabel = 'Cabañas' | 'Habitaciones';
 
 export interface Settings {
   hotelName: string;
+  /** URL absoluta del logo subido en Ajustes; "" = hoja de monstera. */
+  logoUrl: string;
   roomLabel: RoomLabel;
   whatsappNumber: string;
   whatsappGreeting: string;

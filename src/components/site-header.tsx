@@ -4,7 +4,7 @@ import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 import { DEFAULT_SETTINGS, getSettings } from '@/lib/api';
 import type { Settings } from '@/lib/types';
-import { Monstera } from './decor';
+import { BrandLogo } from './brand-logo';
 import { SiteNav } from './site-nav';
 
 function navLinks(settings: Settings) {
@@ -27,13 +27,8 @@ function HeaderShell({ settings, nav }: { settings: Settings; nav: ReactNode }) 
         Saltar al contenido
       </a>
       <div className="relative mx-auto flex h-18 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" className="group flex min-w-0 items-center gap-2.5" aria-label={`${settings.hotelName}, inicio`}>
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-selva-700 text-ambar transition-transform duration-300 group-hover:-rotate-12">
-            <Monstera className="size-6" />
-          </span>
-          <span className="whitespace-nowrap font-display text-xl font-semibold leading-tight text-papel-claro sm:text-2xl">
-            {settings.hotelName}
-          </span>
+        <Link href="/" className="flex min-w-0 items-center" aria-label={`${settings.hotelName}, inicio`}>
+          <BrandLogo logoUrl={settings.logoUrl} hotelName={settings.hotelName} />
         </Link>
         {nav}
       </div>

@@ -11,6 +11,7 @@ import {
   ShoppingBasket,
   X,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
@@ -120,9 +121,15 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
   const brand = (
     <Link href="/admin" className="flex items-center gap-2.5">
-      <span className="grid size-9 place-items-center rounded-full bg-papel-claro text-bosque">
-        <Monstera className="size-5" />
-      </span>
+      {settings.data?.logoUrl ? (
+        <span className="rounded-lg bg-papel-claro px-1.5 py-1">
+          <Image src={settings.data.logoUrl} alt="" width={52} height={36} className="h-8 w-auto object-contain" />
+        </span>
+      ) : (
+        <span className="grid size-9 place-items-center rounded-full bg-papel-claro text-bosque">
+          <Monstera className="size-5" />
+        </span>
+      )}
       <span className="leading-tight">
         <span className="block font-display text-lg text-papel-claro">
           {settings.data?.hotelName ?? 'Rancho Porvenir'}

@@ -44,6 +44,7 @@ async function apiGet<T>(path: string): Promise<T> {
 
 export const DEFAULT_SETTINGS: Settings = {
   hotelName: 'Rancho Porvenir',
+  logoUrl: '',
   roomLabel: 'Cabañas',
   whatsappNumber: '',
   whatsappGreeting: '¡Hola! Quiero información sobre el Rancho Porvenir.',

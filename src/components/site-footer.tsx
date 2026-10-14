@@ -4,7 +4,8 @@ import { connection } from 'next/server';
 import { getSettings } from '@/lib/api';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from './brand-icons';
-import { CanopyEdge, Monstera } from './decor';
+import { BrandLogo } from './brand-logo';
+import { CanopyEdge } from './decor';
 import { WhatsAppFloat } from './whatsapp-float';
 
 export async function SiteFooter() {
@@ -24,9 +25,7 @@ export async function SiteFooter() {
         <div className="follaje pb-24 pt-10 text-arena lg:pb-10">
           <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 md:grid-cols-3">
             <div>
-              <p className="flex items-center gap-2 font-display text-2xl text-papel-claro">
-                <Monstera className="size-7 text-ambar" /> {settings.hotelName}
-              </p>
+              <BrandLogo logoUrl={settings.logoUrl} hotelName={settings.hotelName} size="lg" />
               <p className="mt-3 max-w-xs leading-relaxed text-arena/90">
                 Cabañas de madera entre la selva del piedemonte amazónico, jacuzzi, cabalgatas y noches
                 para dos. Ven a desconectarte con el sonido del bosque.

@@ -3,6 +3,7 @@
 import { LoaderCircle, Save } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useAdmin } from '@/components/admin/admin-shell';
+import { LogoField } from '@/components/admin/logo-field';
 import { useToast } from '@/components/admin/toast';
 import {
   adminButton,
@@ -35,6 +36,7 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<{ message: string; details: string[] } | null>(null);
   const [saving, setSaving] = useState(false);
+  const [logoUrl, setLogoUrl] = useState(settings.logoUrl);
 
   const set = <K extends keyof SettingsFormValues>(key: K, value: SettingsFormValues[K]) =>
     setValues((v) => ({ ...v, [key]: value }));
@@ -147,6 +149,18 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
       <Panel>
         <h2 className="mb-4 text-xl">Sitio</h2>
         <div className="space-y-5">
+          <div>
+            <p className="mb-1.5 text-sm font-bold">Logo</p>
+            <LogoField
+              logoUrl={logoUrl}
+              hotelName={values.hotelName || 'Rancho Porvenir'}
+              onChange={(saved) => {
+                setLogoUrl(saved.logoUrl);
+                onSaved(saved);
+                reloadSettings();
+              }}
+            />
+          </div>
           {text('hotelName', 'Nombre del hotel')}
           <fieldset>
             <legend className="text-sm font-bold">¿Cómo llamar al alojamiento en el sitio?</legend>
