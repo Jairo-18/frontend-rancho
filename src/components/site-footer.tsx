@@ -132,6 +132,12 @@ export async function SiteFooter() {
               >
                 Jhon Jairo Legarda Erazo
               </a>
+              <span className="mx-2 text-arena/40" aria-hidden>
+                ·
+              </span>
+              <Link href="/admin" className="font-semibold underline-offset-4 hover:text-papel-claro hover:underline">
+                Acceso admin
+              </Link>
             </p>
           </div>
         </div>

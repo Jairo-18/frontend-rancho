@@ -14,7 +14,7 @@ export const cardGrid = {
   ride: 'flex flex-wrap justify-center gap-6 [&>*]:flex-[1_1_17rem] [&>*]:max-w-[22rem]',
   product: 'flex flex-wrap justify-center gap-5 [&>*]:flex-[1_1_13rem] [&>*]:max-w-[17rem]',
   /** Productos sugeridos en el detalle: alineados con el texto, a la izquierda. */
-  productStart: 'flex flex-wrap justify-start gap-4 [&>*]:flex-[1_1_13rem] [&>*]:max-w-[15rem]',
+  productStart: 'flex flex-wrap justify-center gap-4 sm:justify-start [&>*]:flex-[1_1_13rem] [&>*]:max-w-[15rem]',
 } as const;
 
 /** Clases de botón compartidas (enlaces y botones). */

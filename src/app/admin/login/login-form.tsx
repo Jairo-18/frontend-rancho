@@ -2,15 +2,42 @@
 
 import { Eye, EyeOff, LoaderCircle, Lock } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
-import { type FormEvent, useState } from 'react';
+import { type FormEvent, useState, useSyncExternalStore } from 'react';
 import { adminButton, Field, inputClass } from '@/components/admin/ui';
 
 /** Al entrar siempre se llega al inicio del panel (pedido del usuario). */
 const HOME = '/admin';
 
+/**
+ * «Recordar mi correo»: solo el correo, en este navegador (la contraseña la
+ * guarda el gestor de contraseñas del navegador, nunca la app).
+ */
+const REMEMBER_KEY = 'rancho-porvenir:admin-email';
+const readRemembered = () => {
+  try {
+    return window.localStorage.getItem(REMEMBER_KEY) ?? '';
+  } catch {
+    return '';
+  }
+};
+const saveRemembered = (email: string | null) => {
+  try {
+    if (email) window.localStorage.setItem(REMEMBER_KEY, email);
+    else window.localStorage.removeItem(REMEMBER_KEY);
+  } catch {
+    /* almacenamiento bloqueado: no se recuerda */
+  }
+};
+const noopSubscribe = () => () => {};
+
 export function LoginForm() {
   const params = useSearchParams();
-  const [email, setEmail] = useState('');
+  const remembered = useSyncExternalStore(noopSubscribe, readRemembered, () => '');
+  // null = todavía no se escribió nada: se muestra el correo recordado.
+  const [typedEmail, setEmail] = useState<string | null>(null);
+  const email = typedEmail ?? remembered;
+  const [rememberChoice, setRemember] = useState<boolean | null>(null);
+  const remember = rememberChoice ?? Boolean(remembered);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [pending, setPending] = useState(false);
@@ -29,6 +56,7 @@ export function LoginForm() {
         body: JSON.stringify({ email: email.trim(), password }),
       });
       if (res.ok) {
+        saveRemembered(remember ? email.trim() : null);
         // Recarga completa a propósito: el panel arranca con la sesión recién creada (cookies).
         // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.assign(HOME);
@@ -88,6 +116,15 @@ export function LoginForm() {
           </button>
         </div>
       </Field>
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold text-tinta">
+        <input
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.target.checked)}
+          className="size-5 accent-[var(--color-bosque)]"
+        />
+        Recordar mi correo en este dispositivo
+      </label>
       <button type="submit" disabled={pending || !email || !password} className={`${adminButton.primary} w-full py-3`}>
         {pending ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <Lock className="size-5" aria-hidden />}
         {pending ? 'Entrando…' : 'Entrar'}

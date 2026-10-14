@@ -39,8 +39,10 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
   const roomSingular = singularLabel(settings.roomLabel);
 
   return (
+    // Tres bloques: en el celular la calculadora queda justo después de los
+    // precios (no al final); en escritorio va fija a la derecha.
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
-      <div className="space-y-8">
+      <div className="space-y-8 lg:col-start-1 lg:row-start-1">
         <Gallery images={room.images} title={room.name} />
         <div>
           <div className="flex flex-wrap items-center gap-3">
@@ -79,6 +81,19 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
             precio exacto de cada noche.
           </p>
         </div>
+      </div>
+
+      <div className="lg:sticky lg:top-24 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-start">
+        <PriceCalculator
+          roomSingular={roomSingular}
+          room={{ id: room.id, slug: room.slug, name: room.name, hasJacuzzi: room.hasJacuzzi }}
+          checkInTime={settings.checkInTime}
+          checkOutTime={settings.checkOutTime}
+          fridayNightIsWeekend={settings.fridayNightIsWeekend}
+        />
+      </div>
+
+      <div className="space-y-8 lg:col-start-1 lg:row-start-2">
         {(room.products ?? []).length > 0 && (
           <section aria-labelledby="extras">
             <p className="font-hand text-2xl text-arcilla-700">Para que sea inolvidable</p>
@@ -102,16 +117,6 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
             Recomendaciones y condiciones de reserva
           </Link>
         </div>
-      </div>
-
-      <div className="lg:sticky lg:top-24">
-        <PriceCalculator
-          roomSingular={roomSingular}
-          room={{ id: room.id, slug: room.slug, name: room.name, hasJacuzzi: room.hasJacuzzi }}
-          checkInTime={settings.checkInTime}
-          checkOutTime={settings.checkOutTime}
-          fridayNightIsWeekend={settings.fridayNightIsWeekend}
-        />
       </div>
     </div>
   );

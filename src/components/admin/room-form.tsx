@@ -39,17 +39,17 @@ function ProductPicker({ selected, onChange }: { selected: string[]; onChange: (
   const toggle = (id: string) =>
     onChange((selected.includes(id) ? selected.filter((x) => x !== id) : [...selected, id]).sort());
   return (
-    <ul className="grid gap-2 sm:grid-cols-2">
+    <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
       {products.data.map((product) => {
         const checked = selected.includes(product.id);
         return (
-          <li key={product.id}>
+          <li key={product.id} className="min-w-0">
             <button
               type="button"
               role="checkbox"
               aria-checked={checked}
               onClick={() => toggle(product.id)}
-              className="flex w-full items-center gap-3 rounded-xl border-2 border-arena bg-white px-3 py-2.5 text-left transition hover:border-musgo-700 aria-checked:border-musgo-700 aria-checked:bg-musgo/5"
+              className="flex w-full min-w-0 items-center gap-3 rounded-xl border-2 border-arena bg-white px-3 py-2.5 text-left transition hover:border-musgo-700 aria-checked:border-musgo-700 aria-checked:bg-musgo/5"
             >
               <span
                 className={`grid size-6 shrink-0 place-items-center rounded-md border-2 ${checked ? 'border-musgo-700 bg-musgo-700 text-white' : 'border-arena'}`}
@@ -57,7 +57,7 @@ function ProductPicker({ selected, onChange }: { selected: string[]; onChange: (
                 {checked && <Check className="size-4" aria-hidden />}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-bold">{product.name}</span>
+                <span className="block break-words font-bold leading-snug">{product.name}</span>
                 <span className="text-sm text-tinta-suave">
                   {formatMoney(product.price)}
                   {!product.isActive && ' · inactivo (no se muestra)'}
