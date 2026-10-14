@@ -38,7 +38,7 @@ export default function EditProductPage() {
           />
           <Panel>
             <h2 className="mb-1 text-xl">Foto</h2>
-            <p className="mb-4 text-sm text-tinta-suave">Una foto principal. Subir otra la reemplaza.</p>
+            <p className="mb-4 text-sm text-tinta-suave">Una foto principal. Subir otra la reemplaza; si la borras, el producto queda oculto.</p>
             <ImageManager<AdminProduct>
               entityLabel="El producto"
               images={product.data.imageUrl ? [{ id: 'principal', url: product.data.imageUrl }] : []}
@@ -47,7 +47,7 @@ export default function EditProductPage() {
               isActive={product.data.isActive}
               uploadPath={`products/${product.data.id}/image`}
               uploadMethod="PUT"
-              deletePath={null}
+              deletePath={() => `products/${product.data.id}/image`}
               reorder={null}
               onUpdated={product.mutate}
             />

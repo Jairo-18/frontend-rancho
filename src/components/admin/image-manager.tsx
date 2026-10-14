@@ -216,7 +216,9 @@ export function ImageManager<T>({
     if (!deletePath) return;
     const ok = await confirm({
       title: '¿Borrar esta foto?',
-      message: 'Se borra del sitio y del servidor. No se puede deshacer.',
+      message: lastOfActive
+        ? `Es la última foto: ${entityLabel.toLowerCase()} quedará oculta en el sitio hasta que subas otra. No se puede deshacer.`
+        : 'Se borra del sitio y del servidor. No se puede deshacer.',
       confirmLabel: 'Borrar foto',
       danger: true,
     });
@@ -232,7 +234,8 @@ export function ImageManager<T>({
 
   const count = images.length;
   const below = count < min;
-  const removalBlocked = isActive && count <= min;
+  /** Borrar la última foto de algo publicado lo deja oculto (se avisa al confirmar). */
+  const lastOfActive = isActive && count <= min;
 
   return (
     <div className="space-y-4">
@@ -301,9 +304,8 @@ export function ImageManager<T>({
                     <button
                       type="button"
                       className={`${adminButton.icon} hover:text-arcilla-700`}
-                      disabled={busy || removalBlocked || orderChanged}
+                      disabled={busy || orderChanged}
                       onClick={() => void remove(image.id)}
-                      title={removalBlocked ? `${entityLabel} está activa: debe tener al menos ${min}` : undefined}
                     >
                       <Trash2 className="size-4" aria-hidden />
                       <span className="sr-only">Borrar foto {index + 1}</span>
@@ -326,11 +328,6 @@ export function ImageManager<T>({
             Guardar orden
           </button>
         </div>
-      )}
-      {removalBlocked && deletePath && (
-        <p className="text-xs text-tinta-suave">
-          {entityLabel} está activa: para borrar fotos primero sube otra o desactívala.
-        </p>
       )}
 
       {/* Cola de subida */}
