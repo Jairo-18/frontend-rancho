@@ -122,8 +122,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const brand = (
     <Link href="/admin" className="flex items-center gap-2.5">
       {settings.data?.logoUrl ? (
-        <span className="rounded-lg bg-papel-claro px-1.5 py-1">
-          <Image src={settings.data.logoUrl} alt="" width={52} height={36} className="h-8 w-auto object-contain" />
+        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-papel-claro">
+          <Image src={settings.data.logoUrl} alt="" width={32} height={22} className="h-auto w-8 object-contain" />
         </span>
       ) : (
         <span className="grid size-9 place-items-center rounded-full bg-papel-claro text-bosque">

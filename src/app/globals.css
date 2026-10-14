@@ -144,6 +144,38 @@
   }
 }
 
+/* Pantalla de carga (componente <PageLoader>). */
+.cargador-pulso {
+  animation: cargador-pulso 1.6s ease-in-out infinite;
+}
+@keyframes cargador-pulso {
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 14px rgb(255 194 26 / 0.12);
+  }
+}
+.cargador-puntos > span {
+  animation: cargador-punto 1.2s ease-in-out infinite;
+}
+.cargador-puntos > span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+.cargador-puntos > span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+@keyframes cargador-punto {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+}
+
 /* Aparición al hacer scroll (componente <Reveal>). */
 .reveal {
   opacity: 0;

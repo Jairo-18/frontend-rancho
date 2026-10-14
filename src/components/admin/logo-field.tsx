@@ -63,8 +63,8 @@ export function LogoField({
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
       <div className="grid h-28 w-full place-items-center rounded-2xl bg-selva p-3 sm:w-56">
         {logoUrl ? (
-          <span className="rounded-xl bg-papel-claro px-3 py-2">
-            <Image src={logoUrl} alt={`Logo de ${hotelName}`} width={150} height={80} className="h-16 w-auto object-contain" />
+          <span className="grid size-24 place-items-center rounded-full bg-papel-claro ring-2 ring-ambar/60">
+            <Image src={logoUrl} alt={`Logo de ${hotelName}`} width={72} height={48} className="h-auto w-[4.5rem] object-contain" />
           </span>
         ) : (
           <span className="flex items-center gap-2 text-papel-claro">
@@ -75,8 +75,8 @@ export function LogoField({
       </div>
       <div className="space-y-2">
         <p className="text-sm text-tinta-suave">
-          PNG con fondo transparente o JPG. Se muestra sobre una placa crema en el encabezado y el pie
-          de página.
+          PNG con fondo transparente o JPG. Se muestra dentro de un círculo crema en el encabezado y el
+          pie de página.
         </p>
         <div className="flex flex-wrap gap-2">
           <label htmlFor={inputId} className={`${adminButton.secondary} cursor-pointer ${busy ? 'pointer-events-none opacity-60' : ''}`}>

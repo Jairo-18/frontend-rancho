@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { Monstera } from './decor';
 
 /**
- * Marca del hotel: el logo subido en Ajustes sobre una placa crema (así se lee
+ * Marca del hotel: el logo subido en Ajustes dentro de un círculo crema (así se lee
  * sobre los fondos oscuros de selva sin importar sus colores) o, si no hay
  * logo, la hoja de monstera con el nombre. El logo ya trae el nombre, por eso
  * en ese caso el texto solo queda para lectores de pantalla.
@@ -20,15 +20,15 @@ export function BrandLogo({
   if (logoUrl) {
     return (
       <span
-        className={`inline-flex items-center rounded-2xl bg-papel-claro shadow-calida ${large ? 'px-4 py-2.5' : 'px-2.5 py-1'}`}
+        className={`grid shrink-0 place-items-center rounded-full bg-papel-claro shadow-calida ring-2 ring-ambar/60 ${large ? 'size-28' : 'size-14'}`}
       >
         <Image
           src={logoUrl}
           alt={hotelName}
-          width={large ? 180 : 92}
-          height={large ? 124 : 56}
-          sizes={large ? '180px' : '92px'}
-          className={`w-auto object-contain ${large ? 'h-20' : 'h-12'}`}
+          width={large ? 92 : 46}
+          height={large ? 62 : 31}
+          sizes={large ? '92px' : '46px'}
+          className={`h-auto object-contain ${large ? 'w-[5.75rem]' : 'w-[2.9rem]'}`}
         />
       </span>
     );
