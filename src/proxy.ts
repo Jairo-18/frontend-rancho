@@ -9,16 +9,15 @@ const REFRESH_COOKIE = 'rp_rt';
 const LOGIN_PATH = '/admin/login';
 
 export function proxy(request: NextRequest) {
-  const { pathname, search } = request.nextUrl;
+  const { pathname } = request.nextUrl;
   const hasSession = request.cookies.has(REFRESH_COOKIE);
 
   if (pathname === LOGIN_PATH) {
     return hasSession ? NextResponse.redirect(new URL('/admin', request.url)) : NextResponse.next();
   }
   if (!hasSession) {
-    const login = new URL(LOGIN_PATH, request.url);
-    login.searchParams.set('next', `${pathname}${search}`);
-    return NextResponse.redirect(login);
+    // Después de entrar siempre se llega al inicio del panel.
+    return NextResponse.redirect(new URL(LOGIN_PATH, request.url));
   }
   return NextResponse.next();
 }

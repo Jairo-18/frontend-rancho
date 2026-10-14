@@ -5,10 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { type FormEvent, useState } from 'react';
 import { adminButton, Field, inputClass } from '@/components/admin/ui';
 
-/** Solo se vuelve a rutas del panel (evita redirecciones abiertas). */
-function safeNext(next: string | null): string {
-  return next && next.startsWith('/admin') && !next.startsWith('//') ? next : '/admin';
-}
+/** Al entrar siempre se llega al inicio del panel (pedido del usuario). */
+const HOME = '/admin';
 
 export function LoginForm() {
   const params = useSearchParams();
@@ -31,7 +29,9 @@ export function LoginForm() {
         body: JSON.stringify({ email: email.trim(), password }),
       });
       if (res.ok) {
-        window.location.assign(safeNext(params.get('next')));
+        // Recarga completa a propósito: el panel arranca con la sesión recién creada (cookies).
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+        window.location.assign(HOME);
         return;
       }
       const body = (await res.json().catch(() => null)) as { message?: string } | null;

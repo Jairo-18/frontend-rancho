@@ -1,8 +1,10 @@
 'use client';
 
-import { ArrowLeft, ArrowRight, ImagePlus, LoaderCircle, Star, Trash2, TriangleAlert } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ImagePlus, LoaderCircle, RotateCcw, Save, Star, Trash2, TriangleAlert } from 'lucide-react';
 import { type DragEvent, useEffect, useRef, useState } from 'react';
 import { AdminApiError, adminFetch, uploadFile } from '@/lib/admin-api';
+import { useConfirm } from './confirm-dialog';
+import { PhotoEditor } from './photo-editor';
 import { useToast } from './toast';
 import { adminButton } from './ui';
 
@@ -70,6 +72,14 @@ export function ImageManager<T>({
   /** Fotos que llegan mientras otra subida está en curso. */
   const pendingRef = useRef<QueueItem[]>([]);
   const replaceMode = max === 1 && uploadMethod === 'PUT';
+  const { confirm, dialog } = useConfirm();
+  /**
+   * Orden y portada en edición: se cambian en pantalla y se guardan juntos con
+   * «Guardar orden» (una sola petición). null = sin cambios pendientes.
+   */
+  const [draft, setDraft] = useState<{ ids: string[]; coverId?: string } | null>(null);
+  /** Fotos elegidas que esperan pasar por el editor antes de subirse. */
+  const [editing, setEditing] = useState<File[]>([]);
 
   // Libera las vistas previas al desmontar.
   const previews = useRef(new Set<string>());
@@ -84,25 +94,38 @@ export function ImageManager<T>({
   function addFiles(files: FileList | File[]) {
     const list = Array.from(files);
     const errors: string[] = [];
-    const accepted: QueueItem[] = [];
+    const accepted: File[] = [];
     for (const file of list) {
       if (!ACCEPTED.includes(file.type)) {
         errors.push(`«${file.name}»: solo se aceptan JPG, PNG o WEBP.`);
       } else if (file.size > MAX_MB * 1024 * 1024) {
         errors.push(`«${file.name}»: pesa más de ${MAX_MB} MB.`);
-      } else if (accepted.length >= slots) {
+      } else if (accepted.length + editing.length >= slots) {
         errors.push(`«${file.name}»: ya se alcanzó el máximo de ${max} ${max === 1 ? 'foto' : 'fotos'}.`);
       } else {
-        const preview = URL.createObjectURL(file);
-        previews.current.add(preview);
-        accepted.push({ key: `upload-${(uploadCounter.current += 1)}`, file, preview, progress: 0 });
+        accepted.push(file);
       }
     }
     setRejected(errors);
-    if (accepted.length > 0) {
-      setQueue((q) => [...q, ...accepted]);
-      void processQueue(accepted);
-    }
+    if (accepted.length > 0) setEditing((list) => [...list, ...accepted]);
+  }
+
+  /** Sube los archivos (ya editados o tal cual) en la cola con progreso. */
+  function enqueue(files: File[]) {
+    const items = files.map((file) => {
+      const preview = URL.createObjectURL(file);
+      previews.current.add(preview);
+      return { key: `upload-${(uploadCounter.current += 1)}`, file, preview, progress: 0 };
+    });
+    if (items.length === 0) return;
+    setQueue((q) => [...q, ...items]);
+    void processQueue(items);
+  }
+
+  /** Resultado del editor para la primera foto en espera. */
+  function onEdited(result: File | null) {
+    setEditing(([, ...rest]) => rest);
+    if (result) enqueue([result]);
   }
 
   /** Sube en secuencia: así el contador de 5 nunca se pasa y cada foto muestra su progreso. */
@@ -134,39 +157,70 @@ export function ImageManager<T>({
     }
     processing.current = false;
   }
-  async function run(action: () => Promise<T>, success: string) {
+  /** Ejecuta un cambio en la API; devuelve si salió bien. */
+  async function run(action: () => Promise<T>, success: string): Promise<boolean> {
     setBusy(true);
     try {
       const entity = await action();
       onUpdated(entity);
       toast('success', success);
+      return true;
     } catch (error) {
       toast('error', error instanceof Error ? error.message : 'No se pudo guardar el cambio.');
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
+  // El borrador solo vale si sigue teniendo exactamente las mismas fotos
+  // (si se subió o borró una, se descarta).
+  const savedIds = images.map((image) => image.id);
+  const savedCover = images.find((image) => image.isCover)?.id;
+  const validDraft =
+    draft && draft.ids.length === savedIds.length && draft.ids.every((id) => savedIds.includes(id)) ? draft : null;
+  const orderedIds = validDraft?.ids ?? savedIds;
+  const coverId = validDraft?.coverId ?? savedCover;
+  const shown = orderedIds
+    .map((id) => images.find((image) => image.id === id))
+    .filter((image): image is ManagedImage => Boolean(image))
+    .map((image) => ({ ...image, isCover: supportsCover ? image.id === coverId : image.isCover }));
+  const orderChanged =
+    Boolean(validDraft) &&
+    (orderedIds.some((id, i) => id !== savedIds[i]) || (supportsCover && coverId !== savedCover));
+
   function move(index: number, delta: number) {
-    if (!reorder) return;
-    const ids = images.map((image) => image.id);
+    const ids = [...orderedIds];
     const [moved] = ids.splice(index, 1);
     ids.splice(index + delta, 0, moved);
-    void run(() => adminFetch<T>(reorder.path, { method: 'PATCH', body: reorder.body(ids) }), 'Orden actualizado');
+    setDraft({ ids, coverId });
   }
 
   function setCover(id: string) {
-    if (!reorder) return;
-    const ids = images.map((image) => image.id);
-    void run(
-      () => adminFetch<T>(reorder.path, { method: 'PATCH', body: reorder.body(ids, id) }),
-      'Portada actualizada',
-    );
+    setDraft({ ids: [...orderedIds], coverId: id });
   }
 
-  function remove(id: string) {
+  function saveOrder() {
+    if (!reorder || !orderChanged) return;
+    void run(
+      () =>
+        adminFetch<T>(reorder.path, {
+          method: 'PATCH',
+          body: reorder.body(orderedIds, supportsCover ? coverId : undefined),
+        }),
+      'Orden guardado',
+    ).then((ok) => ok && setDraft(null));
+  }
+
+  async function remove(id: string) {
     if (!deletePath) return;
-    if (!window.confirm('¿Borrar esta foto? No se puede deshacer.')) return;
+    const ok = await confirm({
+      title: '¿Borrar esta foto?',
+      message: 'Se borra del sitio y del servidor. No se puede deshacer.',
+      confirmLabel: 'Borrar foto',
+      danger: true,
+    });
+    if (!ok) return;
     void run(() => adminFetch<T>(deletePath(id), { method: 'DELETE' }), 'Foto borrada');
   }
 
@@ -198,7 +252,7 @@ export function ImageManager<T>({
       {/* Fotos actuales */}
       {count > 0 && (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {images.map((image, index) => (
+          {shown.map((image, index) => (
             <li key={image.id} className="overflow-hidden rounded-xl border border-bosque/15 bg-white">
               <div className="relative aspect-[4/3]">
                 {/* eslint-disable-next-line @next/next/no-img-element -- miniaturas del panel, sin optimizar */}
@@ -247,8 +301,8 @@ export function ImageManager<T>({
                     <button
                       type="button"
                       className={`${adminButton.icon} hover:text-arcilla-700`}
-                      disabled={busy || removalBlocked}
-                      onClick={() => remove(image.id)}
+                      disabled={busy || removalBlocked || orderChanged}
+                      onClick={() => void remove(image.id)}
                       title={removalBlocked ? `${entityLabel} está activa: debe tener al menos ${min}` : undefined}
                     >
                       <Trash2 className="size-4" aria-hidden />
@@ -260,6 +314,18 @@ export function ImageManager<T>({
             </li>
           ))}
         </ul>
+      )}
+      {orderChanged && (
+        <div className="flex flex-wrap items-center gap-2 rounded-xl bg-ambar/15 px-3 py-2.5" role="status">
+          <p className="flex-1 text-sm font-semibold text-tinta">Cambiaste el orden o la portada: guarda para aplicarlo.</p>
+          <button type="button" onClick={() => setDraft(null)} disabled={busy} className={adminButton.secondary}>
+            <RotateCcw className="size-4" aria-hidden /> Deshacer
+          </button>
+          <button type="button" onClick={saveOrder} disabled={busy} className={adminButton.primary}>
+            {busy ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Save className="size-4" aria-hidden />}
+            Guardar orden
+          </button>
+        </div>
       )}
       {removalBlocked && deletePath && (
         <p className="text-xs text-tinta-suave">
@@ -347,6 +413,19 @@ export function ImageManager<T>({
             }}
           />
         </div>
+      )}
+      {dialog}
+      {editing.length > 0 && (
+        <PhotoEditor
+          key={`${editing[0].name}-${editing[0].lastModified}-${editing.length}`}
+          file={editing[0]}
+          remaining={editing.length - 1}
+          onDone={onEdited}
+          onSkipAll={() => {
+            enqueue(editing);
+            setEditing([]);
+          }}
+        />
       )}
     </div>
   );

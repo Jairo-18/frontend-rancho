@@ -2,11 +2,13 @@
 
 import { LoaderCircle, Save } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
+import { formatCopInput } from '@/lib/admin-input';
 import { AdminApiError, adminFetch } from '@/lib/admin-api';
-import { fieldErrors, productSchema, type ProductFormValues } from '@/lib/admin-schemas';
+import { DESCRIPTION_MAX, fieldErrors, productSchema, type ProductFormValues } from '@/lib/admin-schemas';
 import type { AdminProduct } from '@/lib/types';
 import { useToast } from './toast';
-import { adminButton, Field, FormError, inputClass, invalidProps, Panel } from './ui';
+import { adminButton, CharCount, Field, FormError, inputClass, invalidProps, MoneyInput, Panel } from './ui';
+import { useFormState } from './use-form-state';
 
 export function ProductForm({
   product,
@@ -16,20 +18,18 @@ export function ProductForm({
   onSaved: (product: AdminProduct) => void;
 }) {
   const toast = useToast();
-  const [values, setValues] = useState<ProductFormValues>(() => ({
+  const { values, set, dirty, markSaved } = useFormState<ProductFormValues>(() => ({
     name: product?.name ?? '',
     description: product?.description ?? '',
-    price: product?.price.toString() ?? '',
+    price: product ? formatCopInput(String(product.price)) : '',
   }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<{ message: string; details: string[] } | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const set = <K extends keyof ProductFormValues>(key: K, value: ProductFormValues[K]) =>
-    setValues((v) => ({ ...v, [key]: value }));
-
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!dirty) return;
     const parsed = productSchema.safeParse(values);
     if (!parsed.success) {
       setErrors(fieldErrors(parsed.error));
@@ -44,6 +44,7 @@ export function ProductForm({
         body: parsed.data,
       });
       toast('success', product ? 'Cambios guardados' : 'Producto creado. Ahora sube su foto.');
+      markSaved();
       onSaved(saved);
     } catch (error) {
       setServerError(
@@ -80,19 +81,19 @@ export function ProductForm({
             className={inputClass}
             {...invalidProps('pr-description', errors.description)}
           />
+          <CharCount value={values.description} max={DESCRIPTION_MAX} />
         </Field>
         <Field label="Precio (COP)" htmlFor="pr-price" error={errors.price}>
-          <input
+          <MoneyInput
             id="pr-price"
-            inputMode="numeric"
             value={values.price}
-            onChange={(e) => set('price', e.target.value)}
-            className={`${inputClass} sm:max-w-56`}
-            placeholder="28000"
-            {...invalidProps('pr-price', errors.price)}
+            onChange={(v) => set('price', v)}
+            className="sm:max-w-56"
+            placeholder="50.000"
+            invalid={invalidProps('pr-price', errors.price)}
           />
         </Field>
-        <button type="submit" disabled={saving} className={`${adminButton.primary} w-full sm:w-auto`}>
+        <button type="submit" disabled={saving || !dirty} className={`${adminButton.primary} w-full sm:w-auto`}>
           {saving ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <Save className="size-5" aria-hidden />}
           {product ? 'Guardar cambios' : 'Crear producto'}
         </button>

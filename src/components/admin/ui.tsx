@@ -1,8 +1,9 @@
 'use client';
 
-import { CircleAlert, LoaderCircle, Plus, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CircleAlert, LoaderCircle, Plus, Search } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { formatCopInput } from '@/lib/admin-input';
 import type { StatusFilter } from '@/lib/types';
 
 /**
@@ -85,6 +86,17 @@ export function Field({
         </p>
       )}
     </div>
+  );
+}
+
+/** "120 / 200" bajo un campo de texto; en rojo si se pasa. */
+export function CharCount({ value, max }: { value: string; max: number }) {
+  const over = value.length > max;
+  return (
+    <p className={`mt-1 text-right text-xs font-bold tabular-nums ${over ? 'text-arcilla-700' : 'text-tinta-suave'}`}>
+      {value.length} / {max}
+      {over && ' · acórtala para poder guardar'}
+    </p>
   );
 }
 
@@ -241,5 +253,77 @@ export function FormError({ message, details = [] }: { message: string | null; d
         </ul>
       )}
     </div>
+  );
+}
+
+/**
+ * Precio en pesos: se escribe con punto de miles mientras se teclea
+ * ("300000" → "300.000"). Guarda el texto formateado; el esquema lo convierte a número.
+ */
+export function MoneyInput({
+  id,
+  value,
+  onChange,
+  placeholder,
+  className = '',
+  invalid,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+  invalid?: Record<string, unknown>;
+}) {
+  return (
+    <div className={`relative ${className}`}>
+      <span className="pointer-events-none absolute left-3.5 top-1/2 mt-[3px] -translate-y-1/2 font-bold text-tinta-suave">$</span>
+      <input
+        id={id}
+        inputMode="numeric"
+        autoComplete="off"
+        value={value}
+        onChange={(e) => onChange(formatCopInput(e.target.value))}
+        placeholder={placeholder}
+        className={`${inputClass} pl-8 font-semibold tabular-nums`}
+        {...invalid}
+      />
+      <span className="pointer-events-none absolute right-3.5 top-1/2 mt-[3px] -translate-y-1/2 text-xs font-bold text-tinta-suave">COP</span>
+    </div>
+  );
+}
+
+/** Paginador de las listas del panel: «Página 2 de 3» con anterior / siguiente. */
+export function AdminPager({
+  page,
+  totalPages,
+  total,
+  onPage,
+}: {
+  page: number;
+  totalPages: number;
+  total: number;
+  onPage: (page: number) => void;
+}) {
+  if (totalPages <= 1) return null;
+  const arrow =
+    'grid size-10 place-items-center rounded-xl border-2 border-arena bg-white text-bosque transition hover:border-bosque disabled:opacity-35 disabled:hover:border-arena';
+  return (
+    <nav aria-label="Páginas" className="mt-4 flex items-center justify-between gap-3">
+      <p className="text-sm text-tinta-suave">{total} en total</p>
+      <div className="flex items-center gap-2">
+        <button type="button" onClick={() => onPage(page - 1)} disabled={page <= 1} className={arrow}>
+          <ChevronLeft className="size-5" aria-hidden />
+          <span className="sr-only">Página anterior</span>
+        </button>
+        <span className="min-w-28 text-center text-sm font-bold" aria-live="polite">
+          Página {page} de {totalPages}
+        </span>
+        <button type="button" onClick={() => onPage(page + 1)} disabled={page >= totalPages} className={arrow}>
+          <ChevronRight className="size-5" aria-hidden />
+          <span className="sr-only">Página siguiente</span>
+        </button>
+      </div>
+    </nav>
   );
 }

@@ -121,3 +121,27 @@ export async function getProducts(): Promise<Product[]> {
   cacheTag(CATALOG_TAG);
   return apiGet<Product[]>('products');
 }
+
+/** Busca uno por slug; null si no existe o está inactivo. */
+async function getBySlug<T>(resource: string, slug: string): Promise<T | null> {
+  try {
+    return await apiGet<T>(`${resource}/${encodeURIComponent(slug)}`);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+export async function getHorsebackRide(slug: string): Promise<Horseback | null> {
+  'use cache';
+  cacheLife('minutes');
+  cacheTag(CATALOG_TAG);
+  return getBySlug<Horseback>('horseback', slug);
+}
+
+export async function getProduct(slug: string): Promise<Product | null> {
+  'use cache';
+  cacheLife('minutes');
+  cacheTag(CATALOG_TAG);
+  return getBySlug<Product>('products', slug);
+}

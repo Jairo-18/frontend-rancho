@@ -40,11 +40,15 @@ export interface Room {
   slug: string;
   description: string;
   hasJacuzzi: boolean;
+  /** Lo que incluye, como etiquetas. */
+  amenities: string[];
   capacity: number | null;
   weekdayPrice: number;
   weekendPrice: number;
   coverImageUrl: string | null;
   images: RoomImage[];
+  /** Productos sugeridos con la habitación (solo los activos). */
+  products: Product[];
 }
 
 export interface Horseback {
@@ -104,6 +108,8 @@ export type StatusFilter = 'all' | 'active' | 'inactive';
 
 export interface AdminRoom extends Room {
   isActive: boolean;
+  /** Todos los productos asociados, activos o no. */
+  productIds: string[];
   createdAt: string;
   updatedAt: string;
 }

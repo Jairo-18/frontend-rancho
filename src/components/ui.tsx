@@ -4,6 +4,19 @@ import type { ReactNode } from 'react';
 import { formatMoney } from '@/lib/format';
 import { BranchDivider, Leaf } from './decor';
 
+/**
+ * Filas de tarjetas: cada tarjeta crece hasta un ancho máximo y las filas se
+ * centran, incluida la última (con 4 tarjetas en filas de 3, la cuarta queda
+ * al centro, no a la izquierda). 1 sola tarjeta tampoco se estira.
+ */
+export const cardGrid = {
+  room: 'flex flex-wrap justify-center gap-6 [&>*]:flex-[1_1_17rem] [&>*]:max-w-[22rem]',
+  ride: 'flex flex-wrap justify-center gap-6 [&>*]:flex-[1_1_17rem] [&>*]:max-w-[22rem]',
+  product: 'flex flex-wrap justify-center gap-5 [&>*]:flex-[1_1_13rem] [&>*]:max-w-[17rem]',
+  /** Productos sugeridos en el detalle: alineados con el texto, a la izquierda. */
+  productStart: 'flex flex-wrap justify-start gap-4 [&>*]:flex-[1_1_13rem] [&>*]:max-w-[15rem]',
+} as const;
+
 /** Clases de botón compartidas (enlaces y botones). */
 export const buttonStyles = {
   primary:
@@ -143,7 +156,7 @@ export function ErrorState({
 /** Esqueleto de carga de una grilla de tarjetas. */
 export function CardGridSkeleton({ count = 3 }: { count?: number }) {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-busy="true" aria-label="Cargando">
+    <div className={cardGrid.room} aria-busy="true" aria-label="Cargando">
       {Array.from({ length: count }, (_, i) => (
         <div key={i} className="card-papel overflow-hidden">
           <div className="aspect-[4/3] animate-pulse bg-arena" />
@@ -158,6 +171,12 @@ export function CardGridSkeleton({ count = 3 }: { count?: number }) {
   );
 }
 
+/**
+ * Ancho del contenido del sitio: en celular y tablet con margen lateral; en
+ * escritorio el 80 % de la pantalla (tope de 105 rem para monitores muy anchos).
+ */
+export const SITE_WIDTH = 'mx-auto w-full max-w-6xl px-4 sm:px-6 lg:w-[80%] lg:max-w-[105rem] lg:px-0';
+
 export function Container({ children, className = '' }: { children: ReactNode; className?: string }) {
-  return <div className={`mx-auto w-full max-w-6xl px-4 sm:px-6 ${className}`}>{children}</div>;
+  return <div className={`${SITE_WIDTH} ${className}`}>{children}</div>;
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Minus, Plus } from 'lucide-react';
+import { Check, Minus, Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { MAX_GUESTS, MAX_QUANTITY, requestActions, useRequest } from '@/lib/request-store';
@@ -44,6 +44,19 @@ export function Stepper({
   );
 }
 
+/** Quitar de la solicitud sin tener que ir a «Mi solicitud». */
+export function RemoveFromRequest({ onClick, label = 'Quitar de mi solicitud' }: { onClick: () => void; label?: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex w-full items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold text-arcilla-700 transition hover:bg-arcilla/10"
+    >
+      <X className="size-4" aria-hidden /> {label}
+    </button>
+  );
+}
+
 function AddedNote({ text }: { text: string }) {
   return (
     <p role="status" className="flex flex-wrap items-center gap-x-2 text-sm font-bold text-musgo-700">
@@ -71,8 +84,9 @@ export function AddRoomButton({
 
   if (inRequest) {
     return (
-      <div className={className}>
+      <div className={`space-y-1 ${className}`}>
         <AddedNote text={`${roomSingular} en tu solicitud`} />
+        <RemoveFromRequest onClick={requestActions.removeRoom} />
       </div>
     );
   }
@@ -121,7 +135,17 @@ export function AddHorsebackControl({
         <Plus className="size-4" aria-hidden />
         {current ? 'Actualizar personas' : 'Agregar a mi solicitud'}
       </button>
-      {current && <AddedNote text={`En tu solicitud para ${current.people}`} />}
+      {current && (
+        <>
+          <AddedNote text={`En tu solicitud para ${current.people}`} />
+          <RemoveFromRequest
+            onClick={() => {
+              requestActions.removeHorseback(ride.id);
+              setPeople(null);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }
@@ -133,18 +157,30 @@ export function AddProductButton({
 }) {
   const selection = useRequest();
   const current = selection.products.find((p) => p.id === product.id);
-  return (
-    <div className="space-y-2">
+  if (!current) {
+    return (
       <button
         type="button"
         className={`${buttonStyles.outline} w-full text-sm`}
         onClick={() => requestActions.addProduct(product)}
-        disabled={(current?.quantity ?? 0) >= MAX_QUANTITY}
       >
-        <Plus className="size-4" aria-hidden />
-        {current ? 'Agregar otro' : 'Agregar a mi solicitud'}
+        <Plus className="size-4" aria-hidden /> Agregar a mi solicitud
       </button>
-      {current && <AddedNote text={`Llevas ${current.quantity}`} />}
+    );
+  }
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-semibold text-tinta-suave">Cantidad</span>
+        <Stepper
+          value={current.quantity}
+          onChange={(quantity) => requestActions.setProductQuantity(product.id, quantity)}
+          max={MAX_QUANTITY}
+          label={`Cantidad de ${product.name}`}
+        />
+      </div>
+      <AddedNote text={`Llevas ${current.quantity}`} />
+      <RemoveFromRequest onClick={() => requestActions.removeProduct(product.id)} />
     </div>
   );
 }

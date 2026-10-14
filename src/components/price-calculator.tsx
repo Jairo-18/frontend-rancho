@@ -8,8 +8,9 @@ import { MAX_GUESTS, requestActions, useRequest } from '@/lib/request-store';
 import { useQuote } from '@/lib/use-quote';
 import type { RequestRoom } from '@/lib/whatsapp';
 import { DateRangePicker } from './date-range-picker';
+
 import { QuoteBreakdown } from './quote-breakdown';
-import { Stepper } from './request-buttons';
+import { RemoveFromRequest, Stepper } from './request-buttons';
 import { buttonStyles } from './ui';
 
 /**
@@ -110,6 +111,7 @@ export function PriceCalculator({
             <Link href="/solicitud" className={buttonStyles.primary}>
               Ver mi solicitud <ArrowRight className="size-5" aria-hidden />
             </Link>
+            <RemoveFromRequest onClick={requestActions.removeRoom} />
           </div>
         ) : (
           <button

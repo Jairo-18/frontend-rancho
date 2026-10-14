@@ -3,8 +3,12 @@
 import { LoaderCircle, Save } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { useAdmin } from '@/components/admin/admin-shell';
+import { ListEditor, TermsEditor } from '@/components/admin/list-editor';
 import { LogoField } from '@/components/admin/logo-field';
+import { TagInput } from '@/components/admin/tag-input';
+import { TimeField } from '@/components/admin/time-field';
 import { useToast } from '@/components/admin/toast';
+import { useFormState } from '@/components/admin/use-form-state';
 import {
   adminButton,
   ErrorBlock,
@@ -23,10 +27,22 @@ import type { Settings } from '@/lib/types';
 import { useAdminData } from '@/lib/use-admin-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 
+/** "Cocina, kiosko y parrilla" → ["Cocina", "kiosko", "parrilla"] */
+function splitAreas(text: string): string[] {
+  return text
+    .split(/,|\s+y\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+/** ["Cocina", "Kiosko", "Parrilla"] → "Cocina, Kiosko y Parrilla" */
+function joinAreas(items: string[]): string {
+  return items.length <= 1 ? (items[0] ?? '') : `${items.slice(0, -1).join(', ')} y ${items[items.length - 1]}`;
+}
+
 function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: Settings) => void }) {
   const toast = useToast();
   const { reloadSettings } = useAdmin();
-  const [values, setValues] = useState<SettingsFormValues>(() => ({
+  const { values, setValues, set, dirty, markSaved } = useFormState<SettingsFormValues>(() => ({
     ...settings,
     socials: { ...settings.socials },
     recommendations: [...settings.recommendations],
@@ -38,13 +54,12 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
   const [saving, setSaving] = useState(false);
   const [logoUrl, setLogoUrl] = useState(settings.logoUrl);
 
-  const set = <K extends keyof SettingsFormValues>(key: K, value: SettingsFormValues[K]) =>
-    setValues((v) => ({ ...v, [key]: value }));
   const setSocial = (key: keyof SettingsFormValues['socials'], value: string) =>
     setValues((v) => ({ ...v, socials: { ...v.socials, [key]: value } }));
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!dirty) return;
     const parsed = settingsSchema.safeParse(values);
     if (!parsed.success) {
       setErrors(fieldErrors(parsed.error));
@@ -56,6 +71,7 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
     try {
       const saved = await adminFetch<Settings>('settings', { method: 'PUT', body: parsed.data });
       toast('success', 'Ajustes guardados: ya se ven en el sitio.');
+      markSaved();
       onSaved(saved);
       reloadSettings();
     } catch (error) {
@@ -70,7 +86,7 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
   }
 
   const text = (
-    key: 'hotelName' | 'address' | 'city' | 'mapsUrl' | 'email' | 'phone' | 'checkInTime' | 'checkOutTime' | 'sharedAreas',
+    key: 'hotelName' | 'address' | 'city' | 'mapsUrl' | 'email' | 'phone',
     label: string,
     hint?: string,
     type = 'text',
@@ -85,21 +101,6 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
         {...invalidProps(`st-${key}`, errors[key])}
       />
     </Field>
-  );
-
-  const lines = (key: 'recommendations' | 'houseRules' | 'bookingTerms', label: string, hint: string) => (
-    <div className="sm:col-span-2">
-      <Field label={label} htmlFor={`st-${key}`} error={errors[key]} hint={hint}>
-        <textarea
-          id={`st-${key}`}
-          rows={Math.min(10, Math.max(3, values[key].length + 1))}
-          value={values[key].join('\n')}
-          onChange={(e) => set(key, e.target.value.split('\n'))}
-          className={inputClass}
-          {...invalidProps(`st-${key}`, errors[key])}
-        />
-      </Field>
-    </div>
   );
 
   return (
@@ -207,9 +208,24 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
           vacío para ocultarlo.
         </p>
         <div className="grid gap-5 sm:grid-cols-2">
-          {text('checkInTime', 'Hora de llegada', 'Ej.: 3:00 p. m.')}
-          {text('checkOutTime', 'Hora de salida', 'Ej.: 12:00 m.')}
-          <div className="sm:col-span-2">{text('sharedAreas', 'Zonas comunes', 'Ej.: Cocina, kiosko, parrilla y barril asador')}</div>
+          <Field label="Hora de llegada" htmlFor="st-checkin" error={errors.checkInTime} hint="Desde qué hora pueden entrar.">
+            <TimeField id="st-checkin" value={values.checkInTime} onChange={(v) => set('checkInTime', v)} />
+          </Field>
+          <Field label="Hora de salida" htmlFor="st-checkout" error={errors.checkOutTime} hint="Hasta qué hora deben salir. Mediodía se muestra como «12:00 m.».">
+            <TimeField id="st-checkout" value={values.checkOutTime} onChange={(v) => set('checkOutTime', v)} />
+          </Field>
+          <div className="sm:col-span-2">
+            <Field label="Zonas comunes" htmlFor="st-shared" error={errors.sharedAreas} hint="Cada zona es una etiqueta: escríbela y presiona Enter.">
+              <TagInput
+                id="st-shared"
+                value={splitAreas(values.sharedAreas)}
+                onChange={(tags) => set('sharedAreas', joinAreas(tags))}
+                suggestions={['Cocina', 'Kiosko', 'Parrilla', 'Barril asador', 'Zona de camping', 'Piscina']}
+                max={12}
+                maxLength={40}
+              />
+            </Field>
+          </div>
           <div className="sm:col-span-2">
             <Field label="Mascotas" htmlFor="st-pets" error={errors.petsPolicy}>
               <textarea
@@ -222,9 +238,33 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
               />
             </Field>
           </div>
-          {lines('recommendations', 'Recomendaciones', 'Una por línea.')}
-          {lines('houseRules', 'Normas de la casa', 'Una por línea. Se muestran resaltadas en rojo.')}
-          {lines('bookingTerms', 'Condiciones de reserva', 'Una por línea, con el formato «Título: texto». Ej.: Saldo: el resto se paga al llegar.')}
+          <div className="sm:col-span-2">
+            <Field label="Recomendaciones" htmlFor="st-recommendations" error={errors.recommendations} hint="Cada recomendación en su casilla.">
+              <ListEditor
+                id="st-recommendations"
+                value={values.recommendations}
+                onChange={(items) => set('recommendations', items)}
+                addLabel="Agregar recomendación"
+                placeholder="Ej.: Trae repelente para insectos."
+              />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field label="Normas de la casa" htmlFor="st-houseRules" error={errors.houseRules} hint="Se muestran resaltadas en rojo en el sitio.">
+              <ListEditor
+                id="st-houseRules"
+                value={values.houseRules}
+                onChange={(items) => set('houseRules', items)}
+                addLabel="Agregar norma"
+                placeholder="Ej.: No se permite fumar dentro de las cabañas."
+              />
+            </Field>
+          </div>
+          <div className="sm:col-span-2">
+            <Field label="Condiciones de reserva" htmlFor="st-bookingTerms" error={errors.bookingTerms} hint="Un título corto y el detalle de cada condición.">
+              <TermsEditor id="st-bookingTerms" value={values.bookingTerms} onChange={(items) => set('bookingTerms', items)} />
+            </Field>
+          </div>
         </div>
       </Panel>
 
@@ -248,9 +288,14 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
       </Panel>
 
       <div className="sticky bottom-4 z-10 flex justify-end">
-        <button type="submit" disabled={saving} className={`${adminButton.primary} shadow-calida-lg`}>
+        <button
+          type="submit"
+          disabled={saving || !dirty}
+          title={dirty ? undefined : 'No hay cambios por guardar'}
+          className={`${adminButton.primary} shadow-calida-lg`}
+        >
           {saving ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <Save className="size-5" aria-hidden />}
-          Guardar ajustes
+          {dirty ? 'Guardar ajustes' : 'Sin cambios'}
         </button>
       </div>
     </form>

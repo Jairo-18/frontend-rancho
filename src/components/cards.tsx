@@ -2,6 +2,7 @@ import { Clock, ImageOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDuration, formatMoney } from '@/lib/format';
+import { toPlainText } from '@/lib/rich-text';
 import type { Horseback, Product, Room } from '@/lib/types';
 import { AddHorsebackControl, AddProductButton, AddRoomButton } from './request-buttons';
 import { CapacityBadge, JacuzziBadge, PricePair } from './ui';
@@ -60,7 +61,7 @@ export function RoomCard({
               <CapacityBadge capacity={room.capacity} />
             </div>
           )}
-          <p className="mt-2 line-clamp-3 text-tinta-suave">{room.description}</p>
+          <p className="mt-2 line-clamp-3 text-tinta-suave">{toPlainText(room.description)}</p>
         </div>
         <PricePair
           weekdayPrice={room.weekdayPrice}
@@ -87,15 +88,19 @@ export function RoomCard({
 export function HorsebackCard({ ride }: { ride: Horseback }) {
   return (
     <article className={cardClass}>
-      <div className="relative aspect-[4/3] overflow-hidden">
-        <CardImage src={ride.coverImageUrl} alt={`${ride.name}: paseo a caballo en el rancho`} />
+      <Link href={`/cabalgatas/${ride.slug}`} className="relative block aspect-[4/3] overflow-hidden" tabIndex={-1} aria-hidden>
+        <CardImage src={ride.coverImageUrl} alt="" />
         <span className="sello absolute left-3 top-3 bg-papel-claro/95 text-bosque">
           <Clock className="size-4" aria-hidden /> {formatDuration(ride.durationMinutes)}
         </span>
-      </div>
+      </Link>
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <h3 className="text-2xl font-semibold">{ride.name}</h3>
-        <p className="text-tinta-suave">{ride.description}</p>
+        <h3 className="text-2xl font-semibold">
+          <Link href={`/cabalgatas/${ride.slug}`} className="hover:text-arcilla-700">
+            {ride.name}
+          </Link>
+        </h3>
+        <p className="line-clamp-5 text-tinta-suave">{toPlainText(ride.description)}</p>
         {ride.schedule && (
           <p className="rounded-xl bg-arena/50 px-3 py-2 text-sm text-tinta">
             <span className="font-bold">Horario: </span>
@@ -125,12 +130,16 @@ export function HorsebackCard({ ride }: { ride: Horseback }) {
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className={cardClass}>
-      <div className="relative aspect-square overflow-hidden">
-        <CardImage src={product.imageUrl} alt={product.name} />
-      </div>
+      <Link href={`/productos/${product.slug}`} className="relative block aspect-square overflow-hidden" tabIndex={-1} aria-hidden>
+        <CardImage src={product.imageUrl} alt="" />
+      </Link>
       <div className="flex flex-1 flex-col gap-2 p-5">
-        <h3 className="text-xl font-semibold">{product.name}</h3>
-        <p className="text-sm text-tinta-suave">{product.description}</p>
+        <h3 className="text-xl font-semibold">
+          <Link href={`/productos/${product.slug}`} className="hover:text-arcilla-700">
+            {product.name}
+          </Link>
+        </h3>
+        <p className="line-clamp-4 text-sm text-tinta-suave">{toPlainText(product.description)}</p>
         <p className="font-display text-xl font-semibold text-madera-900">{formatMoney(product.price)}</p>
         <div className="mt-auto pt-2">
           <AddProductButton product={{ id: product.id, name: product.name, price: product.price }} />

@@ -10,6 +10,8 @@ describe('roomSchema', () => {
       capacity: '',
       weekdayPrice: '280.000',
       weekendPrice: '$350.000',
+      amenities: [' Wifi ', 'Minibar'],
+      productIds: ['p2', 'p1'],
     });
     expect(parsed).toEqual({
       name: 'Cabaña del Roble',
@@ -18,6 +20,8 @@ describe('roomSchema', () => {
       capacity: null,
       weekdayPrice: 280000,
       weekendPrice: 350000,
+      amenities: ['Wifi', 'Minibar'],
+      productIds: ['p2', 'p1'],
     });
   });
 
@@ -29,6 +33,8 @@ describe('roomSchema', () => {
       capacity: '0',
       weekdayPrice: '',
       weekendPrice: 'abc',
+      amenities: [],
+      productIds: [],
     });
     expect(result.success).toBe(false);
     const errors = fieldErrors(result.error!);

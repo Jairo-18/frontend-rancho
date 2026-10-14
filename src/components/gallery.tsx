@@ -21,7 +21,18 @@ export function Gallery({ images, title }: { images: { id: string; url: string }
         if (event.key === 'ArrowRight') go(1);
       }}
     >
-      <div className="relative aspect-[4/3] overflow-hidden rounded-[var(--radius-organico)] bg-arena shadow-calida-lg sm:aspect-[16/10]">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[var(--radius-organico)] bg-selva shadow-calida-lg sm:aspect-[4/3]">
+        {/* Fondo: la misma foto ampliada y desenfocada, para que las fotos verticales
+            u horizontales se vean completas sin franjas vacías. */}
+        <Image
+          key={`fondo-${current.id}`}
+          src={current.url}
+          alt=""
+          fill
+          sizes="64px"
+          className="scale-110 object-cover opacity-70 blur-2xl"
+          aria-hidden
+        />
         <Image
           key={current.id}
           src={current.url}
@@ -29,7 +40,7 @@ export function Gallery({ images, title }: { images: { id: string; url: string }
           fill
           priority={index === 0}
           sizes="(min-width: 1024px) 680px, 100vw"
-          className="animate-fade-up object-cover"
+          className="animate-fade-up object-contain drop-shadow-xl"
         />
         {images.length > 1 && (
           <>

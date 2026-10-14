@@ -32,10 +32,12 @@ export default function EditHorsebackPage() {
             publicUrl="/cabalgatas"
             onUpdated={ride.mutate}
             reload={ride.reload}
+            name={ride.data.name}
+            listHref="/admin/cabalgatas"
           />
           <Panel>
             <h2 className="mb-1 text-xl">Fotos</h2>
-            <p className="mb-4 text-sm text-tinta-suave">Entre 1 y 5. La primera es la portada.</p>
+            <p className="mb-4 text-sm text-tinta-suave">Hasta 5. Con la primera se publica sola; la primera es la portada.</p>
             <ImageManager<AdminHorseback>
               entityLabel="La cabalgata"
               images={ride.data.images}

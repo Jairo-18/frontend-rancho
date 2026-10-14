@@ -6,6 +6,9 @@ import { z } from 'zod';
  * espera la API. El backend vuelve a validar todo.
  */
 
+/** Máximo de caracteres de las descripciones (igual que el backend). */
+export const DESCRIPTION_MAX = 200;
+
 const requiredText = (label: string, max: number) =>
   z.string().trim().min(1, `${label} es obligatorio`).max(max, `${label}: máximo ${max} caracteres`);
 
@@ -55,17 +58,19 @@ const optionalMoney = (label: string) =>
 
 export const roomSchema = z.object({
   name: requiredText('El nombre', 120),
-  description: requiredText('La descripción', 5000),
+  description: requiredText('La descripción', DESCRIPTION_MAX),
   hasJacuzzi: z.boolean(),
   capacity: optionalInt('La capacidad', 1, 50),
   weekdayPrice: money('El precio entre semana'),
   weekendPrice: money('El precio de fin de semana'),
+  amenities: z.array(z.string().trim().min(1).max(60)).max(30, 'Máximo 30 etiquetas'),
+  productIds: z.array(z.string()).max(20, 'Máximo 20 productos'),
 });
 export type RoomFormValues = z.input<typeof roomSchema>;
 
 export const horsebackSchema = z.object({
   name: requiredText('El nombre', 120),
-  description: requiredText('La descripción', 5000),
+  description: requiredText('La descripción', DESCRIPTION_MAX),
   durationMinutes: z
     .string()
     .trim()
@@ -85,7 +90,7 @@ export type HorsebackFormValues = z.input<typeof horsebackSchema>;
 
 export const productSchema = z.object({
   name: requiredText('El nombre', 120),
-  description: requiredText('La descripción', 2000),
+  description: requiredText('La descripción', DESCRIPTION_MAX),
   price: money('El precio'),
 });
 export type ProductFormValues = z.input<typeof productSchema>;

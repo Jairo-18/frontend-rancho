@@ -3,17 +3,19 @@
 import { LoaderCircle, Save } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { AdminApiError, adminFetch } from '@/lib/admin-api';
-import { fieldErrors, horsebackSchema, type HorsebackFormValues } from '@/lib/admin-schemas';
+import { DESCRIPTION_MAX, fieldErrors, horsebackSchema, type HorsebackFormValues } from '@/lib/admin-schemas';
 import type { AdminHorseback } from '@/lib/types';
 import { useToast } from './toast';
-import { adminButton, Field, FormError, inputClass, invalidProps, Panel } from './ui';
+import { formatCopInput } from '@/lib/admin-input';
+import { adminButton, CharCount, Field, FormError, inputClass, invalidProps, MoneyInput, Panel } from './ui';
+import { useFormState } from './use-form-state';
 
 function initialValues(ride?: AdminHorseback): HorsebackFormValues {
   return {
     name: ride?.name ?? '',
     description: ride?.description ?? '',
     durationMinutes: ride?.durationMinutes.toString() ?? '',
-    pricePerPerson: ride?.pricePerPerson?.toString() ?? '',
+    pricePerPerson: ride?.pricePerPerson != null ? formatCopInput(String(ride.pricePerPerson)) : '',
     schedule: ride?.schedule ?? '',
   };
 }
@@ -26,16 +28,14 @@ export function HorsebackForm({
   onSaved: (ride: AdminHorseback) => void;
 }) {
   const toast = useToast();
-  const [values, setValues] = useState<HorsebackFormValues>(() => initialValues(ride));
+  const { values, set, dirty, markSaved } = useFormState<HorsebackFormValues>(() => initialValues(ride));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<{ message: string; details: string[] } | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const set = <K extends keyof HorsebackFormValues>(key: K, value: HorsebackFormValues[K]) =>
-    setValues((v) => ({ ...v, [key]: value }));
-
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!dirty) return;
     const parsed = horsebackSchema.safeParse(values);
     if (!parsed.success) {
       setErrors(fieldErrors(parsed.error));
@@ -51,6 +51,7 @@ export function HorsebackForm({
         body,
       });
       toast('success', ride ? 'Cambios guardados' : 'Cabalgata creada. Ahora sube al menos una foto.');
+      markSaved();
       onSaved(saved);
     } catch (error) {
       setServerError(
@@ -87,6 +88,7 @@ export function HorsebackForm({
             className={inputClass}
             {...invalidProps('hb-description', errors.description)}
           />
+          <CharCount value={values.description} max={DESCRIPTION_MAX} />
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Duración (minutos)" htmlFor="hb-duration" error={errors.durationMinutes}>
@@ -94,7 +96,7 @@ export function HorsebackForm({
               id="hb-duration"
               inputMode="numeric"
               value={values.durationMinutes}
-              onChange={(e) => set('durationMinutes', e.target.value)}
+              onChange={(e) => set('durationMinutes', e.target.value.replace(/\D/g, '').slice(0, 4))}
               className={inputClass}
               placeholder="90"
               {...invalidProps('hb-duration', errors.durationMinutes)}
@@ -106,13 +108,12 @@ export function HorsebackForm({
             error={errors.pricePerPerson}
             hint="Déjalo vacío para mostrar «Consultar precio»."
           >
-            <input
+            <MoneyInput
               id="hb-price"
-              inputMode="numeric"
               value={values.pricePerPerson}
-              onChange={(e) => set('pricePerPerson', e.target.value)}
-              className={inputClass}
-              {...invalidProps('hb-price', errors.pricePerPerson)}
+              onChange={(v) => set('pricePerPerson', v)}
+              placeholder="35.000"
+              invalid={invalidProps('hb-price', errors.pricePerPerson)}
             />
           </Field>
         </div>
@@ -126,7 +127,7 @@ export function HorsebackForm({
             {...invalidProps('hb-schedule', errors.schedule)}
           />
         </Field>
-        <button type="submit" disabled={saving} className={`${adminButton.primary} w-full sm:w-auto`}>
+        <button type="submit" disabled={saving || !dirty} className={`${adminButton.primary} w-full sm:w-auto`}>
           {saving ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <Save className="size-5" aria-hidden />}
           {ride ? 'Guardar cambios' : 'Crear cabalgata'}
         </button>

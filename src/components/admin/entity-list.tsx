@@ -6,7 +6,8 @@ import { type ReactNode, useState } from 'react';
 import type { StatusFilter } from '@/lib/types';
 import { useAdminData } from '@/lib/use-admin-data';
 import { useDebounced } from '@/lib/use-debounced';
-import { EmptyBlock, ErrorBlock, ListToolbar, LoadingBlock, StatusBadge } from './ui';
+import { paginate } from '@/lib/paginate';
+import { AdminPager, EmptyBlock, ErrorBlock, ListToolbar, LoadingBlock, StatusBadge } from './ui';
 
 interface ListItem {
   id: string;
@@ -39,6 +40,7 @@ export function EntityList<T extends ListItem>({
 }) {
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [page, setPage] = useState(1);
   const debounced = useDebounced(search.trim());
   const query = new URLSearchParams({ status, ...(debounced && { search: debounced }) });
   const list = useAdminData<T[]>(`${apiPath}?${query}`);
@@ -46,7 +48,18 @@ export function EntityList<T extends ListItem>({
   return (
     <div>
       {searchable && (
-        <ListToolbar search={search} onSearch={setSearch} status={status} onStatus={setStatus} />
+        <ListToolbar
+          search={search}
+          onSearch={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          status={status}
+          onStatus={(value) => {
+            setStatus(value);
+            setPage(1);
+          }}
+        />
       )}
       {list.status === 'loading' && <LoadingBlock />}
       {list.status === 'error' && <ErrorBlock message={list.error} onRetry={list.reload} />}
@@ -57,7 +70,7 @@ export function EntityList<T extends ListItem>({
       )}
       {list.status === 'ready' && list.data.length > 0 && (
         <ul className="divide-y divide-bosque/10 overflow-hidden rounded-2xl border border-bosque/15 bg-papel-claro shadow-calida">
-          {list.data.map((item) => {
+          {paginate(list.data, String(page)).items.map((item) => {
             const src = thumbnail?.(item);
             return (
               <li key={item.id}>
@@ -88,6 +101,14 @@ export function EntityList<T extends ListItem>({
             );
           })}
         </ul>
+      )}
+      {list.status === 'ready' && (
+        <AdminPager
+          page={paginate(list.data, String(page)).page}
+          totalPages={paginate(list.data, String(page)).totalPages}
+          total={list.data.length}
+          onPage={setPage}
+        />
       )}
       <p className="sr-only" aria-live="polite">
         {list.status === 'ready' ? `${list.data.length} resultados` : ''}

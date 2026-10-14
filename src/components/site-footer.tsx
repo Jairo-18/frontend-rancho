@@ -6,6 +6,7 @@ import { whatsappUrl } from '@/lib/whatsapp';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from './brand-icons';
 import { BrandLogo } from './brand-logo';
 import { CanopyEdge } from './decor';
+import { SITE_WIDTH } from './ui';
 import { WhatsAppFloat } from './whatsapp-float';
 
 export async function SiteFooter() {
@@ -13,9 +14,23 @@ export async function SiteFooter() {
   const settings = await getSettings();
   const year = new Date().getFullYear();
   const socials = [
-    { href: settings.socials.instagram, label: 'Instagram', Icon: InstagramIcon },
-    { href: settings.socials.facebook, label: 'Facebook', Icon: FacebookIcon },
-    { href: settings.socials.tiktok, label: 'TikTok', Icon: TikTokIcon },
+    // Cada red con su color oficial para reconocerla de un vistazo.
+    {
+      href: settings.socials.instagram,
+      label: 'Instagram',
+      Icon: InstagramIcon,
+      color:
+        'bg-[radial-gradient(circle_at_30%_107%,#fdf497_0%,#fdf497_5%,#fd5949_45%,#d6249f_60%,#285aeb_90%)]',
+    },
+    { href: settings.socials.facebook, label: 'Facebook', Icon: FacebookIcon, color: 'bg-[#1877f2]' },
+    {
+      href: settings.socials.tiktok,
+      label: 'TikTok',
+      Icon: TikTokIcon,
+      // Negro con el destello cian y rojo del logo de TikTok.
+      color:
+        'bg-black ring-1 ring-white/25 [&_svg]:[filter:drop-shadow(-1.5px_-1px_0_#25f4ee)_drop-shadow(1.5px_1px_0_#fe2c55)]',
+    },
   ].filter((social) => social.href);
 
   return (
@@ -23,9 +38,9 @@ export async function SiteFooter() {
       <footer className="mt-24">
         <CanopyEdge className="-mb-px text-selva" />
         <div className="follaje pb-24 pt-10 text-arena lg:pb-10">
-          <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 md:grid-cols-3">
+          <div className={`grid gap-10 md:grid-cols-3 ${SITE_WIDTH}`}>
             <div>
-              <BrandLogo logoUrl={settings.logoUrl} hotelName={settings.hotelName} size="lg" />
+              <BrandLogo logoUrl={settings.logoUrl} hotelName={settings.hotelName} size="lg" showName="always" />
               <p className="mt-3 max-w-xs leading-relaxed text-arena/90">
                 Cabañas de madera entre la selva del piedemonte amazónico, jacuzzi, cabalgatas y noches
                 para dos. Ven a desconectarte con el sonido del bosque.
@@ -86,13 +101,13 @@ export async function SiteFooter() {
               </ul>
               {socials.length > 0 && (
                 <ul className="mt-6 flex gap-3">
-                  {socials.map(({ href, label, Icon }) => (
+                  {socials.map(({ href, label, Icon, color }) => (
                     <li key={label}>
                       <a
                         href={href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="grid size-11 place-items-center rounded-full border border-arena/30 transition duration-200 hover:-translate-y-0.5 hover:bg-arena/10"
+                        className={`grid size-11 place-items-center rounded-full text-white shadow-calida transition duration-200 hover:-translate-y-0.5 hover:brightness-110 ${color}`}
                       >
                         <Icon className="size-5" />
                         <span className="sr-only">{label}</span>
@@ -103,9 +118,22 @@ export async function SiteFooter() {
               )}
             </div>
           </div>
-          <p className="mx-auto mt-10 max-w-6xl border-t border-arena/15 px-4 pt-6 text-sm text-arena/75 sm:px-6">
-            © {year} {settings.hotelName}. Los precios son estimados y se confirman por WhatsApp.
-          </p>
+          <div
+            className={`mt-10 flex flex-col gap-2 border-t border-arena/15 pt-6 text-sm text-arena/75 md:flex-row md:items-center md:justify-between ${SITE_WIDTH}`}
+          >
+            <p>© {year} {settings.hotelName}. Los precios son estimados y se confirman por WhatsApp.</p>
+            <p>
+              Diseñado y desarrollado por{' '}
+              <a
+                href="https://jhonlegardaportfolio.netlify.app/home"
+                target="_blank"
+                rel="noopener"
+                className="font-bold text-ambar underline-offset-4 hover:underline"
+              >
+                Jhon Jairo Legarda Erazo
+              </a>
+            </p>
+          </div>
         </div>
       </footer>
       <WhatsAppFloat number={settings.whatsappNumber} greeting={settings.whatsappGreeting} />

@@ -3,10 +3,12 @@ import { connection } from 'next/server';
 import { RoomCard } from '@/components/cards';
 import { RoomLabelText, SafeSection } from '@/components/safe-section';
 import { PageBanner } from '@/components/page-banner';
-import { CardGridSkeleton, Container, EmptyState } from '@/components/ui';
+import { Pagination } from '@/components/pagination';
+import { CardGridSkeleton, cardGrid, Container, EmptyState } from '@/components/ui';
 import { Reveal } from '@/components/reveal';
 import { getRooms, getSettings } from '@/lib/api';
 import { singularLabel } from '@/lib/format';
+import { paginate } from '@/lib/paginate';
 import { PHOTOS } from '@/lib/photos';
 
 export const metadata: Metadata = {
@@ -17,43 +19,47 @@ export const metadata: Metadata = {
   openGraph: { title: 'Cabañas del Rancho Porvenir', url: '/cabanas' },
 };
 
-async function RoomList() {
+async function RoomList({ searchParams }: { searchParams: PageProps<'/cabanas'>['searchParams'] }) {
   await connection();
+  const { pagina } = await searchParams;
   const [settings, rooms] = await Promise.all([getSettings(), getRooms()]);
   if (rooms.length === 0) {
     return (
       <EmptyState title="Muy pronto">
-        Estamos preparando nuestras {settings.roomLabel.toLowerCase()}. Escríbenos por WhatsApp y te
-        contamos.
+        Estamos preparando nuestras {settings.roomLabel.toLowerCase()}. Escríbenos por WhatsApp y te contamos.
       </EmptyState>
     );
   }
+  const current = paginate(rooms, pagina);
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {rooms.map((room, i) => (
-        <Reveal key={room.id} delay={(i % 3) * 90}>
-          <RoomCard
-            room={room}
-            priority={i < 2}
-            roomSingular={singularLabel(settings.roomLabel)}
-            fridayNightIsWeekend={settings.fridayNightIsWeekend}
-          />
-        </Reveal>
-      ))}
-    </div>
+    <>
+      <div className={cardGrid.room}>
+        {current.items.map((room, i) => (
+          <Reveal key={room.id} delay={(i % 3) * 90}>
+            <RoomCard
+              room={room}
+              priority={i < 2}
+              roomSingular={singularLabel(settings.roomLabel)}
+              fridayNightIsWeekend={settings.fridayNightIsWeekend}
+            />
+          </Reveal>
+        ))}
+      </div>
+      <Pagination page={current.page} totalPages={current.totalPages} basePath="/cabanas" />
+    </>
   );
 }
 
-export default function RoomsPage() {
+export default function RoomsPage({ searchParams }: PageProps<'/cabanas'>) {
   return (
     <>
       <PageBanner photo={PHOTOS.jacuzziCabana} position="50% 55%" eyebrow="Para quedarse" title={<RoomLabelText />}>
-        Cada una con su encanto: madera, follaje alrededor y algunas con jacuzzi privado. Mira el
-        precio por noche y calcula tu estadía en el detalle.
+        Cada una con su encanto: madera, follaje alrededor y algunas con jacuzzi privado. Mira el precio por noche y
+        calcula tu estadía en el detalle.
       </PageBanner>
       <Container className="py-12 sm:py-16">
         <SafeSection what="el alojamiento" fallback={<CardGridSkeleton count={3} />}>
-          <RoomList />
+          <RoomList searchParams={searchParams} />
         </SafeSection>
       </Container>
     </>

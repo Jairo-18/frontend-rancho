@@ -7,9 +7,12 @@ import { fieldErrors, priceRuleSchema, type PriceRuleFormValues } from '@/lib/ad
 import { addDays, formatMoney, todayInBogota } from '@/lib/format';
 import type { AdminRoom, PriceRule } from '@/lib/types';
 import { useAdminData } from '@/lib/use-admin-data';
+import { formatCopInput } from '@/lib/admin-input';
 import { useAdmin } from './admin-shell';
+import { useConfirm } from './confirm-dialog';
 import { useToast } from './toast';
-import { adminButton, Field, FormError, inputClass, invalidProps, Panel, Toggle } from './ui';
+import { adminButton, Field, FormError, inputClass, invalidProps, MoneyInput, Panel, Toggle } from './ui';
+import { useFormState } from './use-form-state';
 
 function initialValues(rule?: PriceRule): PriceRuleFormValues {
   const today = todayInBogota();
@@ -19,7 +22,7 @@ function initialValues(rule?: PriceRule): PriceRuleFormValues {
     endDate: rule?.endDate ?? addDays(today, 1),
     roomId: rule?.roomId ?? '',
     type: rule?.type ?? 'PERCENT',
-    value: rule?.value.toString() ?? '',
+    value: rule ? (rule.type === 'FIXED' ? formatCopInput(String(rule.value)) : rule.value.toString()) : '',
     priority: rule?.priority.toString() ?? '10',
     isActive: rule?.isActive ?? true,
   };
@@ -46,16 +49,15 @@ export function PriceRuleForm({
   const { roomLabel } = useAdmin();
   const toast = useToast();
   const rooms = useAdminData<AdminRoom[]>('rooms/admin?status=all');
-  const [values, setValues] = useState<PriceRuleFormValues>(() => initialValues(rule));
+  const { values, set, setValues, dirty, markSaved } = useFormState<PriceRuleFormValues>(() => initialValues(rule));
+  const { confirm, dialog } = useConfirm();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<{ message: string; details: string[] } | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const set = <K extends keyof PriceRuleFormValues>(key: K, value: PriceRuleFormValues[K]) =>
-    setValues((v) => ({ ...v, [key]: value }));
-
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!dirty) return;
     const parsed = priceRuleSchema.safeParse(values);
     if (!parsed.success) {
       setErrors(fieldErrors(parsed.error));
@@ -70,6 +72,7 @@ export function PriceRuleForm({
         body: parsed.data,
       });
       toast('success', rule ? 'Regla actualizada' : 'Regla creada');
+      markSaved();
       onSaved(saved);
     } catch (error) {
       setServerError(
@@ -83,7 +86,14 @@ export function PriceRuleForm({
   }
 
   async function onDelete() {
-    if (!rule || !window.confirm(`¿Borrar la regla «${rule.name}»? No se puede deshacer.`)) return;
+    if (!rule) return;
+    const ok = await confirm({
+      title: `¿Borrar la regla «${rule.name}»?`,
+      message: 'Las noches que cubría vuelven a su precio normal. No se puede deshacer.',
+      confirmLabel: 'Borrar regla',
+      danger: true,
+    });
+    if (!ok) return;
     setSaving(true);
     try {
       await adminFetch<void>(`price-rules/${rule.id}`, { method: 'DELETE' });
@@ -171,7 +181,8 @@ export function PriceRuleForm({
                   name="pr-type"
                   value={option.value}
                   checked={values.type === option.value}
-                  onChange={() => set('type', option.value)}
+                  // Al cambiar de tipo el valor anterior ya no tiene sentido (pesos ≠ %).
+                  onChange={() => setValues((v) => ({ ...v, type: option.value, value: '' }))}
                   className="mt-1 accent-[var(--color-musgo-700)]"
                 />
                 <span>
@@ -190,22 +201,32 @@ export function PriceRuleForm({
             error={errors.value}
             hint={values.type === 'PERCENT' ? 'Usa negativo para descuento, ej. -10' : undefined}
           >
-            <input
-              id="pr-value"
-              inputMode={values.type === 'FIXED' ? 'numeric' : 'text'}
-              value={values.value}
-              onChange={(e) => set('value', e.target.value)}
-              className={inputClass}
-              placeholder={values.type === 'FIXED' ? '450000' : '15'}
-              {...invalidProps('pr-value', errors.value)}
-            />
+            {values.type === 'FIXED' ? (
+              <MoneyInput
+                id="pr-value"
+                value={values.value}
+                onChange={(v) => set('value', v)}
+                placeholder="450.000"
+                invalid={invalidProps('pr-value', errors.value)}
+              />
+            ) : (
+              <input
+                id="pr-value"
+                inputMode="text"
+                value={values.value}
+                onChange={(e) => set('value', e.target.value.replace(/[^\d-]/g, '').replace(/(?!^)-/g, '').slice(0, 4))}
+                className={inputClass}
+                placeholder="15"
+                {...invalidProps('pr-value', errors.value)}
+              />
+            )}
           </Field>
           <Field label="Prioridad" htmlFor="pr-priority" error={errors.priority} hint="Si dos reglas cubren la misma noche, gana el número mayor.">
             <input
               id="pr-priority"
               inputMode="numeric"
               value={values.priority}
-              onChange={(e) => set('priority', e.target.value)}
+              onChange={(e) => set('priority', e.target.value.replace(/\D/g, '').slice(0, 4))}
               className={inputClass}
               {...invalidProps('pr-priority', errors.priority)}
             />
@@ -224,12 +245,13 @@ export function PriceRuleForm({
           ) : (
             <span />
           )}
-          <button type="submit" disabled={saving} className={adminButton.primary}>
+          <button type="submit" disabled={saving || !dirty} className={adminButton.primary}>
             {saving ? <LoaderCircle className="size-5 animate-spin" aria-hidden /> : <Save className="size-5" aria-hidden />}
             {rule ? 'Guardar cambios' : 'Crear regla'}
           </button>
         </div>
       </form>
+      {dialog}
     </Panel>
   );
 }

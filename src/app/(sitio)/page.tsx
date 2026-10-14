@@ -12,6 +12,7 @@ import { RoomLabelText, SafeSection } from '@/components/safe-section';
 import {
   buttonStyles,
   CardGridSkeleton,
+  cardGrid,
   Container,
   EmptyState,
   SectionHeading,
@@ -126,7 +127,7 @@ async function FeaturedRooms() {
     return <EmptyState title="Muy pronto">Estamos preparando las {settings.roomLabel.toLowerCase()}.</EmptyState>;
   }
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className={cardGrid.room}>
       {rooms.slice(0, 3).map((room, i) => (
         <Reveal key={room.id} delay={i * 90}>
           <RoomCard
@@ -145,7 +146,7 @@ async function FeaturedRides() {
   const rides = await getHorsebackRides();
   if (rides.length === 0) return <EmptyState title="Las cabalgatas vuelven pronto" />;
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className={cardGrid.ride}>
       {rides.slice(0, 2).map((ride, i) => (
         <Reveal key={ride.id} delay={i * 90}>
           <HorsebackCard ride={ride} />
@@ -160,7 +161,7 @@ async function FeaturedProducts() {
   const products = await getProducts();
   if (products.length === 0) return <EmptyState title="Pronto tendremos productos de la finca" />;
   return (
-    <div className="grid grid-cols-1 gap-5 min-[420px]:grid-cols-2 lg:grid-cols-4">
+    <div className={cardGrid.product}>
       {products.slice(0, 4).map((product, i) => (
         <Reveal key={product.id} delay={i * 70}>
           <ProductCard product={product} />

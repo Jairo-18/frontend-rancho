@@ -11,7 +11,7 @@ import { ErrorBlock, LoadingBlock, Panel } from '@/components/admin/ui';
 import type { AdminRoom } from '@/lib/types';
 import { useAdminData } from '@/lib/use-admin-data';
 
-const MIN_PHOTOS = 3;
+const MIN_PHOTOS = 1;
 const MAX_PHOTOS = 5;
 
 export default function EditRoomPage() {
@@ -32,16 +32,19 @@ export default function EditRoomPage() {
           <StatusPanel<AdminRoom>
             isActive={room.data.isActive}
             canActivate={room.data.images.length >= MIN_PHOTOS}
-            requirement={`Sube al menos ${MIN_PHOTOS} fotos`}
+            requirement="Sube al menos una foto"
             apiPath={`rooms/${room.data.id}`}
             publicUrl={`/cabanas/${room.data.slug}`}
             onUpdated={room.mutate}
             reload={room.reload}
+            name={room.data.name}
+            listHref="/admin/cabanas"
+            deleteWarning="sus reglas de precio propias y los productos sugeridos (los productos no se borran)"
           />
           <Panel>
             <h2 className="mb-1 text-xl">Fotos</h2>
             <p className="mb-4 text-sm text-tinta-suave">
-              Entre {MIN_PHOTOS} y {MAX_PHOTOS}. La estrella marca la portada; las flechas cambian el orden.
+              Hasta {MAX_PHOTOS}. Con la primera se publica sola. La estrella marca la portada; las flechas cambian el orden.
             </p>
             <ImageManager<AdminRoom>
               entityLabel={`La ${roomSingular.toLowerCase()}`}

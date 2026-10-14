@@ -32,6 +32,9 @@ export default function EditProductPage() {
             publicUrl="/productos"
             onUpdated={product.mutate}
             reload={product.reload}
+            name={product.data.name}
+            listHref="/admin/productos"
+            deleteWarning="y deja de aparecer en las cabañas donde se sugería"
           />
           <Panel>
             <h2 className="mb-1 text-xl">Foto</h2>

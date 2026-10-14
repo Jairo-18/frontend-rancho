@@ -6,6 +6,7 @@ import { type ChangeEvent, useId, useState } from 'react';
 import { AdminApiError, adminFetch, uploadFile } from '@/lib/admin-api';
 import type { Settings } from '@/lib/types';
 import { Monstera } from '../decor';
+import { useConfirm } from './confirm-dialog';
 import { useToast } from './toast';
 import { adminButton } from './ui';
 
@@ -26,6 +27,7 @@ export function LogoField({
   const inputId = useId();
   const [busy, setBusy] = useState<'upload' | 'remove' | null>(null);
   const [progress, setProgress] = useState(0);
+  const { confirm, dialog } = useConfirm();
 
   async function onFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -45,7 +47,13 @@ export function LogoField({
   }
 
   async function onRemove() {
-    if (!window.confirm('¿Quitar el logo? El sitio mostrará la hoja con el nombre del hotel.')) return;
+    const ok = await confirm({
+      title: '¿Quitar el logo?',
+      message: 'El sitio mostrará la hoja de monstera con el nombre del hotel.',
+      confirmLabel: 'Quitar logo',
+      danger: true,
+    });
+    if (!ok) return;
     setBusy('remove');
     try {
       await adminFetch<void>('settings/logo', { method: 'DELETE' });
@@ -99,6 +107,7 @@ export function LogoField({
           )}
         </div>
       </div>
+      {dialog}
     </div>
   );
 }

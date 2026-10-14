@@ -1,8 +1,10 @@
 'use client';
 
-import { ExternalLink, LoaderCircle, Power } from 'lucide-react';
+import { ExternalLink, LoaderCircle, Power, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { adminFetch } from '@/lib/admin-api';
+import { useConfirm } from './confirm-dialog';
 import { useToast } from './toast';
 import { adminButton, Panel, StatusBadge } from './ui';
 
@@ -18,6 +20,9 @@ export function StatusPanel<T>({
   publicUrl,
   onUpdated,
   reload,
+  name,
+  listHref,
+  deleteWarning,
 }: {
   isActive: boolean;
   canActivate: boolean;
@@ -27,12 +32,29 @@ export function StatusPanel<T>({
   publicUrl?: string;
   onUpdated: (entity: T) => void;
   reload: () => void;
+  /** Nombre para el diálogo de eliminar. */
+  name: string;
+  /** Adónde volver después de eliminar. */
+  listHref: string;
+  /** Qué más se borra (p. ej. reglas de precio de esa cabaña). */
+  deleteWarning?: string;
 }) {
+  const router = useRouter();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  const { confirm, dialog } = useConfirm();
 
   async function toggle() {
-    if (isActive && !window.confirm('¿Desactivar? Dejará de verse en el sitio (puedes activarla de nuevo).')) return;
+    if (
+      isActive &&
+      !(await confirm({
+        title: '¿Desactivar?',
+        message: 'Dejará de verse en el sitio. Puedes activarla de nuevo cuando quieras.',
+        confirmLabel: 'Desactivar',
+        danger: true,
+      }))
+    )
+      return;
     setBusy(true);
     try {
       if (isActive) {
@@ -46,6 +68,30 @@ export function StatusPanel<T>({
     } catch (error) {
       toast('error', error instanceof Error ? error.message : 'No se pudo cambiar el estado.');
     } finally {
+      setBusy(false);
+    }
+  }
+
+  async function removePermanently() {
+    const ok = await confirm({
+      title: `¿Eliminar «${name}»?`,
+      message: (
+        <>
+          Se borra para siempre, con todas sus fotos{deleteWarning ? `, ${deleteWarning}` : ''}. No se puede
+          deshacer. Si solo quieres ocultarla del sitio, usa <strong>Desactivar</strong>.
+        </>
+      ),
+      confirmLabel: 'Eliminar para siempre',
+      danger: true,
+    });
+    if (!ok) return;
+    setBusy(true);
+    try {
+      await adminFetch<void>(`${apiPath}/permanent`, { method: 'DELETE' });
+      toast('success', `«${name}» eliminada`);
+      router.push(listHref);
+    } catch (error) {
+      toast('error', error instanceof Error ? error.message : 'No se pudo eliminar.');
       setBusy(false);
     }
   }
@@ -80,8 +126,12 @@ export function StatusPanel<T>({
             {busy ? <LoaderCircle className="size-4 animate-spin" aria-hidden /> : <Power className="size-4" aria-hidden />}
             {isActive ? 'Desactivar' : 'Activar'}
           </button>
+          <button type="button" onClick={() => void removePermanently()} disabled={busy} className={adminButton.danger}>
+            <Trash2 className="size-4" aria-hidden /> Eliminar
+          </button>
         </div>
       </div>
+      {dialog}
     </Panel>
   );
 }

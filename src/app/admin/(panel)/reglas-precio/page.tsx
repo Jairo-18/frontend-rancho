@@ -13,7 +13,9 @@ import {
   NewButton,
   PageHeader,
   StatusBadge,
+  AdminPager,
 } from '@/components/admin/ui';
+import { paginate } from '@/lib/paginate';
 import { formatDate, formatMoney, todayInBogota } from '@/lib/format';
 import type { PriceRule, StatusFilter } from '@/lib/types';
 import { useAdminData } from '@/lib/use-admin-data';
@@ -30,6 +32,7 @@ export default function PriceRulesPage() {
   const [year, setYear] = useState(String(currentYear));
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [page, setPage] = useState(1);
   const debounced = useDebounced(search.trim());
   const query = new URLSearchParams({ status, ...(year && { year }), ...(debounced && { search: debounced }) });
   const rules = useAdminData<PriceRule[]>(`price-rules?${query}`);
@@ -42,15 +45,38 @@ export default function PriceRulesPage() {
         action={<NewButton href="/admin/reglas-precio/nueva">Nueva regla</NewButton>}
       />
       <div className="mb-3 sm:max-w-48">
-        <label htmlFor="pr-year" className="text-sm font-bold">Año</label>
-        <select id="pr-year" value={year} onChange={(e) => setYear(e.target.value)} className={inputClass}>
+        <label htmlFor="pr-year" className="text-sm font-bold">
+          Año
+        </label>
+        <select
+          id="pr-year"
+          value={year}
+          onChange={(e) => {
+            setYear(e.target.value);
+            setPage(1);
+          }}
+          className={inputClass}
+        >
           {[currentYear - 1, currentYear, currentYear + 1, currentYear + 2].map((y) => (
-            <option key={y} value={y}>{y}</option>
+            <option key={y} value={y}>
+              {y}
+            </option>
           ))}
           <option value="">Todos</option>
         </select>
       </div>
-      <ListToolbar search={search} onSearch={setSearch} status={status} onStatus={setStatus} />
+      <ListToolbar
+        search={search}
+        onSearch={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        status={status}
+        onStatus={(value) => {
+          setStatus(value);
+          setPage(1);
+        }}
+      />
 
       {rules.status === 'loading' && <LoadingBlock />}
       {rules.status === 'error' && <ErrorBlock message={rules.error} onRetry={rules.reload} />}
@@ -59,9 +85,12 @@ export default function PriceRulesPage() {
       )}
       {rules.status === 'ready' && rules.data.length > 0 && (
         <ul className="divide-y divide-bosque/10 overflow-hidden rounded-2xl border border-bosque/15 bg-papel-claro shadow-calida">
-          {rules.data.map((rule) => (
+          {paginate(rules.data, String(page)).items.map((rule) => (
             <li key={rule.id}>
-              <Link href={`/admin/reglas-precio/${rule.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-arena/40">
+              <Link
+                href={`/admin/reglas-precio/${rule.id}`}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-arena/40"
+              >
                 <span className="min-w-0 flex-1">
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="font-display text-lg text-bosque">{rule.name}</span>
@@ -84,6 +113,14 @@ export default function PriceRulesPage() {
             </li>
           ))}
         </ul>
+      )}
+      {rules.status === 'ready' && (
+        <AdminPager
+          page={paginate(rules.data, String(page)).page}
+          totalPages={paginate(rules.data, String(page)).totalPages}
+          total={rules.data.length}
+          onPage={setPage}
+        />
       )}
     </>
   );

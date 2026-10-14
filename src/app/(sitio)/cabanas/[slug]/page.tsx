@@ -1,21 +1,24 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
+import { ProductCard } from '@/components/cards';
 import { Gallery } from '@/components/gallery';
 import { PriceCalculator } from '@/components/price-calculator';
+import { RichText } from '@/components/rich-text';
 import { SectionBoundary } from '@/components/section-boundary';
 import { StayFacts } from '@/components/stay-info';
-import { CapacityBadge, Container, JacuzziBadge, PricePair } from '@/components/ui';
+import { CapacityBadge, cardGrid, Container, JacuzziBadge, PricePair } from '@/components/ui';
 import { getRoom, getSettings } from '@/lib/api';
 import { singularLabel } from '@/lib/format';
+import { toPlainText } from '@/lib/rich-text';
 
 export async function generateMetadata({ params }: PageProps<'/cabanas/[slug]'>): Promise<Metadata> {
   const { slug } = await params;
   const room = await getRoom(slug);
   if (!room) return { title: 'No encontrada' };
-  const description = room.description.slice(0, 160);
+  const description = toPlainText(room.description).slice(0, 160);
   return {
     title: room.name,
     description,
@@ -45,11 +48,23 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
             {room.capacity && <CapacityBadge capacity={room.capacity} />}
           </div>
           <h1 className="mt-3 text-4xl font-semibold sm:text-5xl">{room.name}</h1>
-          <div className="mt-5 max-w-prose space-y-4 text-lg leading-relaxed text-tinta-suave">
-            {room.description.split(/\n{2,}/).map((paragraph) => (
-              <p key={paragraph.slice(0, 40)}>{paragraph}</p>
-            ))}
-          </div>
+          <RichText text={room.description} className="mt-5 max-w-prose text-lg leading-relaxed text-tinta-suave" />
+          {(room.amenities ?? []).length > 0 && (
+            <div className="mt-6">
+              <h2 className="mb-3 text-xl">Incluye</h2>
+              <ul className="flex flex-wrap gap-2">
+                {room.amenities.map((item) => (
+                  <li
+                    key={item}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-musgo-700/20 bg-musgo/10 px-3 py-1.5 text-[0.95rem] leading-snug text-tinta"
+                  >
+                    <Check className="size-4 shrink-0 text-musgo-700" aria-hidden />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
         <div className="max-w-lg">
           <h2 className="mb-3 text-2xl">Precio por noche</h2>
@@ -64,6 +79,22 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
             precio exacto de cada noche.
           </p>
         </div>
+        {(room.products ?? []).length > 0 && (
+          <section aria-labelledby="extras">
+            <p className="font-hand text-2xl text-arcilla-700">Para que sea inolvidable</p>
+            <h2 id="extras" className="text-2xl">
+              Hazla aún más especial
+            </h2>
+            <p className="mt-1 text-tinta-suave">
+              Agrégalos a tu solicitud junto con la {roomSingular.toLowerCase()} y los tenemos listos cuando llegues.
+            </p>
+            <div className={`mt-4 ${cardGrid.productStart}`}>
+              {(room.products ?? []).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </section>
+        )}
         <div className="max-w-lg">
           <h2 className="mb-3 text-2xl">Bueno saber</h2>
           <StayFacts settings={settings} />
