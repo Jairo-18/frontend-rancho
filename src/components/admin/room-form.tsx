@@ -133,7 +133,7 @@ export function RoomForm({ room, onSaved }: { room?: AdminRoom; onSaved: (room: 
         >
           <textarea
             id="room-description"
-            rows={3}
+            rows={6}
             value={values.description}
             onChange={(e) => set('description', e.target.value)}
             className={inputClass}

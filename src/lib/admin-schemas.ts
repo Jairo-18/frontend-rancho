@@ -7,7 +7,7 @@ import { z } from 'zod';
  */
 
 /** Máximo de caracteres de las descripciones (igual que el backend). */
-export const DESCRIPTION_MAX = 200;
+export const DESCRIPTION_MAX = 750;
 
 const requiredText = (label: string, max: number) =>
   z.string().trim().min(1, `${label} es obligatorio`).max(max, `${label}: máximo ${max} caracteres`);

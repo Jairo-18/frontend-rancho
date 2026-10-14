@@ -21,11 +21,11 @@ import { WhatsAppIcon } from '@/components/brand-icons';
 import { useAdmin } from '@/components/admin/admin-shell';
 import { HorseSilhouette } from '@/components/decor';
 import { formatDate, todayInBogota, weekdayName } from '@/lib/format';
+import { DESCRIPTION_MAX } from '@/lib/admin-schemas';
 import type { AdminHorseback, AdminProduct, AdminRoom, PriceRule } from '@/lib/types';
 import { useAdminData } from '@/lib/use-admin-data';
 import { whatsappUrl } from '@/lib/whatsapp';
 
-const DESCRIPTION_MAX = 200;
 
 /** Botón grande de acción rápida. */
 function Shortcut({
