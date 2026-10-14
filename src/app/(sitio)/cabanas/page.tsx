@@ -2,15 +2,17 @@ import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { RoomCard } from '@/components/cards';
 import { RoomLabelText, SafeSection } from '@/components/safe-section';
-import { CardGridSkeleton, Container, EmptyState, SectionHeading } from '@/components/ui';
+import { PageBanner } from '@/components/page-banner';
+import { CardGridSkeleton, Container, EmptyState } from '@/components/ui';
 import { Reveal } from '@/components/reveal';
 import { getRooms, getSettings } from '@/lib/api';
 import { singularLabel } from '@/lib/format';
+import { PHOTOS } from '@/lib/photos';
 
 export const metadata: Metadata = {
   title: 'Cabañas',
   description:
-    'Cabañas de madera entre montañas, algunas con jacuzzi privado. Precios por noche entre semana y fin de semana, y calculadora de tu estadía.',
+    'Cabañas de madera entre la selva de Mocoa, algunas con jacuzzi privado. Precios por noche entre semana y fin de semana, y calculadora de tu estadía.',
   alternates: { canonical: '/cabanas' },
   openGraph: { title: 'Cabañas del Rancho Porvenir', url: '/cabanas' },
 };
@@ -44,14 +46,16 @@ async function RoomList() {
 
 export default function RoomsPage() {
   return (
-    <Container className="py-14 sm:py-20">
-      <SectionHeading as="h1" eyebrow="Para quedarse" title={<RoomLabelText />}>
-        Cada una con su encanto: madera, vista a la montaña y algunas con jacuzzi privado. Mira el precio
-        por noche y calcula tu estadía en el detalle.
-      </SectionHeading>
-      <SafeSection what="el alojamiento" fallback={<CardGridSkeleton count={3} />}>
-        <RoomList />
-      </SafeSection>
-    </Container>
+    <>
+      <PageBanner photo={PHOTOS.jacuzziCabana} position="50% 55%" eyebrow="Para quedarse" title={<RoomLabelText />}>
+        Cada una con su encanto: madera, follaje alrededor y algunas con jacuzzi privado. Mira el
+        precio por noche y calcula tu estadía en el detalle.
+      </PageBanner>
+      <Container className="py-12 sm:py-16">
+        <SafeSection what="el alojamiento" fallback={<CardGridSkeleton count={3} />}>
+          <RoomList />
+        </SafeSection>
+      </Container>
+    </>
   );
 }

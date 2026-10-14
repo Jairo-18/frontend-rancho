@@ -1,32 +1,44 @@
 @import "tailwindcss";
 
 /*
- * Sistema de diseño del Rancho Porvenir (CONTEXT §7): rústico, ecológico,
- * cálido y artesanal. Paleta de la finca + variantes oscuras para que el texto
+ * Sistema de diseño del Rancho Porvenir (CONTEXT §7): selva del piedemonte
+ * amazónico, madera cálida y luces de noche. Paleta de la finca + variantes oscuras para que el texto
  * cumpla contraste AA sobre el crema papel (arcilla y musgo puros no llegan a
  * 4.5:1 en texto pequeño; se usan solo en decoración y textos grandes).
  */
 @theme {
-  --color-bosque: #2f4a2b;
-  --color-bosque-900: #1e3019;
-  --color-musgo: #6b8e4e;
-  --color-musgo-700: #4d6a37;
-  --color-madera: #7a5230;
-  --color-madera-900: #4f341d;
-  --color-arcilla: #b5653a;
-  --color-arcilla-700: #8f4b27;
-  --color-papel: #f4ebdc;
-  --color-papel-claro: #faf5ec;
-  --color-arena: #e3d3b8;
+  /*
+   * Paleta andinoamazónica: verdes esmeralda de selva viva, amarillo sol de
+   * guacamaya y rojo achiote, sobre un crema claro.
+   */
+  /* Selva profunda: fondos oscuros del encabezado, hero y secciones de fotos. */
+  --color-selva: #0a3a27;
+  --color-selva-800: #0d4a31;
+  --color-selva-700: #12603e;
+  /* Amarillo sol: acentos y CTA sobre fondos de selva (no para texto sobre crema). */
+  --color-ambar: #ffc21a;
+  --color-ambar-claro: #ffd95c;
+  --color-bosque: #17663a;
+  --color-bosque-900: #0f4d2a;
+  /* Verde hoja viva (decoración); la variante 700 sirve para texto. */
+  --color-musgo: #4fae3b;
+  --color-musgo-700: #2f7a2a;
+  --color-madera: #8c1d24;
+  --color-madera-900: #6b1219;
+  --color-arcilla: #d62839;
+  --color-arcilla-700: #b3132b;
+  --color-papel: #f8f4e8;
+  --color-papel-claro: #fffcf4;
+  --color-arena: #ebe2c8;
   --color-tinta: #2b2118;
-  --color-tinta-suave: #5a4a3b;
+  --color-tinta-suave: #4f4334;
 
   --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-nunito), system-ui, sans-serif;
   --font-hand: var(--font-caveat), cursive;
 
-  --shadow-calida: 0 12px 32px -14px rgb(79 52 29 / 0.38), 0 2px 6px -2px rgb(79 52 29 / 0.12);
-  --shadow-calida-lg: 0 24px 48px -18px rgb(79 52 29 / 0.45), 0 4px 10px -4px rgb(79 52 29 / 0.15);
+  --shadow-calida: 0 12px 32px -14px rgb(10 58 39 / 0.38), 0 2px 6px -2px rgb(10 58 39 / 0.12);
+  --shadow-calida-lg: 0 24px 48px -18px rgb(10 58 39 / 0.45), 0 4px 10px -4px rgb(10 58 39 / 0.15);
 
   --radius-organico: 1.75rem 1.25rem 1.9rem 1.4rem;
 
@@ -54,7 +66,7 @@
     color: var(--color-tinta);
     font-family: var(--font-sans);
     /* Papel con grano: ruido SVG muy sutil, sin imágenes externas. */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.48 0 0 0 0 0.32 0 0 0 0 0.19 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.06 0 0 0 0 0.3 0 0 0 0 0.16 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
   h1,
@@ -87,7 +99,7 @@
   /* Tarjeta de papel kraft con borde cálido. */
   .card-papel {
     background-color: var(--color-papel-claro);
-    border: 1px solid color-mix(in srgb, var(--color-madera) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-bosque) 16%, transparent);
     border-radius: var(--radius-organico);
     box-shadow: var(--shadow-calida);
   }
@@ -108,6 +120,12 @@
         transparent 0 31px,
         rgb(255 255 255 / 0.02) 31px 33px
       );
+  }
+
+  /* Follaje muy sutil para fondos oscuros (secciones de selva). */
+  .follaje {
+    background-color: var(--color-selva);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Cg fill='%234fae3b' fill-opacity='0.1'%3E%3Cpath d='M20 70C20 40 42 22 70 18c-2 30-20 50-50 52z'/%3E%3Cpath d='M150 120c-26 0-44-18-46-44 28 2 44 18 46 44z'/%3E%3Cpath d='M90 150c-4-20 6-36 26-42 4 20-6 36-26 42z'/%3E%3C/g%3E%3C/svg%3E");
   }
 
   /* Sello artesanal: insignias "Jacuzzi", "Entre semana", "Fin de semana". */

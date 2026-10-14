@@ -1,11 +1,12 @@
-import { ArrowRight, Flame, MapPin, Sparkles, Trees } from 'lucide-react';
+import { ArrowRight, Heart, MapPin, Moon, Trees } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { connection } from 'next/server';
 import { Suspense } from 'react';
+import { AmbientVideo } from '@/components/ambient-video';
 import { WhatsAppIcon } from '@/components/brand-icons';
 import { HorsebackCard, ProductCard, RoomCard } from '@/components/cards';
-import { HorseSilhouette, Leaf, MountainsEdge } from '@/components/decor';
-import { HeroLandscape } from '@/components/hero-landscape';
+import { CanopyEdge } from '@/components/decor';
 import { Reveal } from '@/components/reveal';
 import { RoomLabelText, SafeSection } from '@/components/safe-section';
 import {
@@ -17,32 +18,69 @@ import {
 } from '@/components/ui';
 import { getHorsebackRides, getProducts, getRooms, getSettings } from '@/lib/api';
 import { singularLabel } from '@/lib/format';
+import { PHOTOS, type SitePhoto, VIDEOS } from '@/lib/photos';
 import { whatsappUrl } from '@/lib/whatsapp';
 
 const PILLARS = [
   {
     Icon: Trees,
-    title: 'Naturaleza alrededor',
-    text: 'Despierta con el canto de los pájaros, entre montañas, guaduales y el rumor de la quebrada.',
+    title: 'Dormir dentro de la selva',
+    text: 'Cabañas de madera rodeadas de árboles, helechos y flores. Te despiertan los pájaros y el verde entra por la ventana.',
   },
   {
-    Icon: Flame,
-    title: 'Calidez de finca',
-    text: 'Cabañas de madera, fogón, tinto campesino y la atención cercana de la gente del rancho.',
+    Icon: Moon,
+    title: 'Noches cálidas',
+    text: 'Jacuzzi con vista al bosque, luces de bombillo y el canto de las ranas cuando cae la noche.',
   },
   {
-    Icon: Sparkles,
-    title: 'Descanso de verdad',
-    text: 'Jacuzzi, hamacas y noches estrelladas. Sin afanes: aquí el tiempo va al paso del caballo.',
+    Icon: Heart,
+    title: 'Hecho para compartir',
+    text: 'Escápate en pareja, celebra algo especial o sal a cabalgar por los potreros con la montaña de fondo.',
   },
 ];
+
+const ROMANTIC_MESSAGE =
+  'Hola, quiero preparar una sorpresa en una de sus cabañas. ¿Qué opciones de decoración tienen?';
+
+const lightButton =
+  'inline-flex items-center justify-center gap-2 rounded-full border-2 border-papel-claro/80 px-6 py-2.5 font-bold text-papel-claro transition duration-200 hover:-translate-y-0.5 hover:bg-papel-claro hover:text-selva';
+
+/**
+ * Foto con marco cálido y esquinas orgánicas (mosaicos y collages). `className`
+ * debe traer la posición (`relative` o `absolute`) porque la imagen usa `fill`.
+ */
+function FramedPhoto({
+  photo,
+  sizes,
+  className = '',
+  priority = false,
+}: {
+  photo: SitePhoto;
+  sizes: string;
+  className?: string;
+  priority?: boolean;
+}) {
+  return (
+    <div className={`overflow-hidden rounded-[var(--radius-organico)] shadow-calida-lg ${className}`}>
+      <Image
+        src={photo.src}
+        alt={photo.alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+        placeholder="blur"
+        className="object-cover transition-transform duration-700 hover:scale-105"
+      />
+    </div>
+  );
+}
 
 async function HeroActions() {
   await connection();
   const settings = await getSettings();
   return (
     <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-      <Link href="/cabanas" className={buttonStyles.clay}>
+      <Link href="/cabanas" className={buttonStyles.amber}>
         Ver {settings.roomLabel.toLowerCase()} <ArrowRight className="size-5" aria-hidden />
       </Link>
       {settings.whatsappNumber && (
@@ -50,12 +88,34 @@ async function HeroActions() {
           href={whatsappUrl(settings.whatsappNumber, settings.whatsappGreeting)}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-papel-claro/80 px-6 py-2.5 font-bold text-papel-claro transition duration-200 hover:-translate-y-0.5 hover:bg-papel-claro hover:text-bosque"
+          className={lightButton}
         >
           <WhatsAppIcon className="size-5" /> Consultar por WhatsApp
         </a>
       )}
     </div>
+  );
+}
+
+async function RomanticAction() {
+  await connection();
+  const settings = await getSettings();
+  if (!settings.whatsappNumber) {
+    return (
+      <Link href="/contacto" className={buttonStyles.amber}>
+        Escríbenos para planearla <ArrowRight className="size-5" aria-hidden />
+      </Link>
+    );
+  }
+  return (
+    <a
+      href={whatsappUrl(settings.whatsappNumber, ROMANTIC_MESSAGE)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={buttonStyles.amber}
+    >
+      <WhatsAppIcon className="size-5" /> Planear una sorpresa
+    </a>
   );
 }
 
@@ -114,10 +174,10 @@ async function LocationBlurb() {
   await connection();
   const settings = await getSettings();
   return (
-    <p className="mt-4 text-lg text-tinta-suave">
+    <p className="mt-4 text-lg text-papel/90">
       {settings.address ? (
         <>
-          Estamos en <strong className="text-tinta">{settings.address}</strong>
+          Estamos en <strong className="text-papel-claro">{settings.address}</strong>
           {settings.city && `, ${settings.city}`}.
         </>
       ) : (
@@ -130,45 +190,98 @@ async function LocationBlurb() {
 export default function HomePage() {
   return (
     <>
-      {/* Hero a pantalla completa */}
-      <section className="relative isolate -mt-px flex min-h-[calc(100svh-4.5rem)] items-end overflow-hidden">
-        <HeroLandscape className="absolute inset-0 -z-20 h-full w-full" />
-        {/* Overlay verde oscuro para legibilidad */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-bosque-900/90 via-bosque-900/45 to-transparent" />
-        <Container className="pb-16 pt-32 sm:pb-24">
+      {/* Hero: foto a pantalla completa en móvil, collage en escritorio */}
+      <section className="follaje relative isolate overflow-hidden">
+        <Image
+          src={PHOTOS.cabanaAFrame.src}
+          alt=""
+          fill
+          priority
+          placeholder="blur"
+          sizes="(min-width: 1024px) 1px, 100vw"
+          className="-z-20 object-cover object-[50%_35%] lg:hidden"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-selva via-selva/60 to-selva/10 lg:hidden" />
+        <Container className="grid min-h-[calc(100svh-4.5rem)] items-end gap-12 pb-20 pt-32 lg:min-h-0 lg:grid-cols-[1.05fr_1fr] lg:items-center lg:py-24">
           <div className="max-w-2xl animate-fade-up">
-            <p className="font-hand text-3xl text-arena sm:text-4xl">Bienvenido al rancho</p>
+            <p className="font-hand text-3xl text-ambar sm:text-4xl">Piedemonte amazónico · Mocoa</p>
             <h1 className="mt-2 text-5xl font-semibold leading-[1.05] text-papel-claro sm:text-6xl lg:text-7xl">
-              Donde la montaña <em className="font-normal italic text-arena">te abraza</em>
+              Despierta en medio <em className="font-normal italic text-ambar-claro">de la selva</em>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-papel/90 sm:text-xl">
-              Cabañas de madera con jacuzzi, cabalgatas al atardecer y los sabores de la finca. Arma
-              tu plan aquí y lo confirmamos contigo por WhatsApp.
+              Cabañas de madera rodeadas de bosque, jacuzzi bajo las estrellas, cabalgatas y noches
+              para dos. Arma tu plan aquí y lo confirmamos contigo por WhatsApp.
             </p>
             <Suspense fallback={<div className="mt-9 h-12" />}>
               <HeroActions />
             </Suspense>
           </div>
+
+          <div className="relative hidden h-[34rem] lg:block" aria-hidden>
+            <FramedPhoto
+              photo={PHOTOS.cabanaAFrame}
+              sizes="340px"
+              priority
+              className="absolute right-6 top-0 h-[28rem] w-[21rem] rotate-2"
+            />
+            <FramedPhoto
+              photo={PHOTOS.jacuzziSelvaNoche}
+              sizes="260px"
+              priority
+              className="absolute bottom-0 left-0 h-[21rem] w-[16rem] -rotate-3 ring-8 ring-selva"
+            />
+            <span className="absolute bottom-10 right-0 rotate-[-4deg] rounded-full bg-ambar px-5 py-2 font-hand text-2xl text-selva shadow-calida-lg">
+              Noches con jacuzzi
+            </span>
+          </div>
         </Container>
+        <CanopyEdge className="-mb-px text-papel" />
       </section>
 
-      {/* Propuesta de valor */}
+      {/* La experiencia: texto + mosaico de fotos */}
       <section className="py-20">
-        <Container>
-          <SectionHeading eyebrow="La vida en el rancho" title="Un refugio para bajar el ritmo" />
-          <div className="grid gap-6 md:grid-cols-3">
-            {PILLARS.map(({ Icon, title, text }, i) => (
-              <Reveal key={title} delay={i * 100}>
-                <div className="card-papel h-full p-7 text-center">
-                  <span className="mx-auto grid size-16 place-items-center rounded-full bg-musgo/15 text-musgo-700">
-                    <Icon className="size-8" aria-hidden />
-                  </span>
-                  <h3 className="mt-4 text-2xl">{title}</h3>
-                  <p className="mt-2 leading-relaxed text-tinta-suave">{text}</p>
-                </div>
-              </Reveal>
-            ))}
+        <Container className="grid items-center gap-12 lg:grid-cols-2">
+          <div>
+            <SectionHeading align="left" eyebrow="Así se vive el rancho" title="Un refugio verde para bajar el ritmo">
+              Lejos del ruido, entre árboles y montañas del Putumayo. Aquí el plan es descansar, comer
+              rico y dejar que la selva haga lo suyo.
+            </SectionHeading>
+            <div className="space-y-6">
+              {PILLARS.map(({ Icon, title, text }, i) => (
+                <Reveal key={title} delay={i * 100}>
+                  <div className="flex gap-4">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-full bg-musgo/15 text-musgo-700">
+                      <Icon className="size-6" aria-hidden />
+                    </span>
+                    <div>
+                      <h3 className="text-xl font-semibold">{title}</h3>
+                      <p className="mt-1 leading-relaxed text-tinta-suave">{text}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
           </div>
+
+          <Reveal>
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <FramedPhoto
+                photo={PHOTOS.banoGuadua}
+                sizes="(min-width: 1024px) 560px, 100vw"
+                className="col-span-2 aspect-[4/3] sm:aspect-[16/10] relative"
+              />
+              <FramedPhoto
+                photo={PHOTOS.cabanaInterior}
+                sizes="(min-width: 1024px) 280px, 50vw"
+                className="aspect-[3/4] relative"
+              />
+              <FramedPhoto
+                photo={PHOTOS.carpasNoche}
+                sizes="(min-width: 1024px) 280px, 50vw"
+                className="aspect-[3/4] relative"
+              />
+            </div>
+          </Reveal>
         </Container>
       </section>
 
@@ -176,7 +289,8 @@ export default function HomePage() {
       <section className="relative pb-20">
         <Container>
           <SectionHeading eyebrow="Para quedarse" title={<>Nuestras <RoomLabelText lower /></>}>
-            Precios por noche entre semana y fin de semana, a la vista. Elige fechas y calcula tu total.
+            Madera, follaje y descanso. Precios por noche entre semana y fin de semana, a la vista:
+            elige fechas y calcula tu total.
           </SectionHeading>
           <SafeSection what="el alojamiento" fallback={<CardGridSkeleton count={3} />}>
             <FeaturedRooms />
@@ -189,32 +303,94 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* Cabalgatas */}
+      {/* Noches para dos */}
       <section className="relative">
-        <MountainsEdge className="text-arena" />
-        <div className="bg-arena pb-20 pt-8">
-          <Container>
-            <div className="flex justify-center text-madera/70">
-              <HorseSilhouette className="h-14 w-20" />
+        <CanopyEdge className="-mb-px text-selva" />
+        <div className="follaje py-20 text-papel">
+          <Container className="grid items-center gap-12 lg:grid-cols-[1.4fr_1fr]">
+            <Reveal className="order-2 lg:order-1">
+              <div className="grid grid-cols-[1.15fr_1fr] gap-3 sm:gap-4 lg:grid-cols-[1.8fr_1fr]">
+                <div className="relative row-span-2 overflow-hidden rounded-[var(--radius-organico)] bg-selva-800 shadow-calida-lg">
+                  <AmbientVideo
+                    src={VIDEOS.planRomantico.src}
+                    poster={VIDEOS.planRomantico.poster}
+                    label={VIDEOS.planRomantico.label}
+                    className="aspect-[9/16] h-full w-full object-cover lg:absolute lg:inset-0 lg:aspect-auto"
+                  />
+                </div>
+                <FramedPhoto photo={PHOTOS.teAmo} sizes="(min-width: 1024px) 220px, 45vw" className="aspect-[4/5] relative" />
+                <FramedPhoto
+                  photo={PHOTOS.detalleRomantico}
+                  sizes="(min-width: 1024px) 240px, 45vw"
+                  className="aspect-[4/5] relative"
+                />
+              </div>
+            </Reveal>
+            <div className="order-1 lg:order-2">
+              <p className="font-hand text-2xl text-ambar sm:text-3xl">Noches para dos</p>
+              <h2 className="mt-1 text-3xl font-semibold text-papel-claro sm:text-4xl lg:text-5xl">
+                Una sorpresa entre la selva
+              </h2>
+              <p className="mt-5 text-lg leading-relaxed text-papel/85">
+                Aniversarios, pedidas de mano o simplemente ganas de consentir a alguien. Preparamos tu
+                cabaña con pétalos, velas, globos y un buen vino, y el jacuzzi listo cuando lleguen.
+              </p>
+              <p className="mt-3 leading-relaxed text-papel/75">
+                Cuéntanos qué celebras y armamos la sorpresa contigo por WhatsApp.
+              </p>
+              <div className="mt-8">
+                <Suspense fallback={<div className="h-12" />}>
+                  <RomanticAction />
+                </Suspense>
+              </div>
             </div>
-            <SectionHeading eyebrow="Al paso del caballo" title="Cabalgatas por la montaña">
-              Recorridos guiados por potreros, bosque y quebrada. Para principiantes y para quienes ya
-              saben montar.
-            </SectionHeading>
-            <SafeSection what="las cabalgatas" fallback={<CardGridSkeleton count={2} />}>
-              <FeaturedRides />
-            </SafeSection>
           </Container>
         </div>
-        <MountainsEdge className="rotate-180 text-arena" />
+        <CanopyEdge className="rotate-180 text-selva" />
+      </section>
+
+      {/* Cabalgatas */}
+      <section className="py-20">
+        <Container>
+          <div className="mb-12 grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
+            <SectionHeading align="left" eyebrow="Entre potreros y montaña" title="Cabalgatas por el rancho">
+              Recorridos guiados con caballos mansos, con las montañas del Putumayo de fondo. Para
+              principiantes y para quienes ya saben montar.
+            </SectionHeading>
+            <Reveal>
+              <div className="grid grid-cols-3 gap-3">
+                <FramedPhoto
+                  photo={PHOTOS.cabalgataMontana}
+                  sizes="(min-width: 1024px) 160px, 33vw"
+                  className="aspect-[3/4] relative"
+                />
+                <div className="overflow-hidden rounded-[var(--radius-organico)] bg-arena shadow-calida-lg">
+                  <AmbientVideo
+                    src={VIDEOS.potrillo.src}
+                    poster={VIDEOS.potrillo.poster}
+                    label={VIDEOS.potrillo.label}
+                    className="aspect-[3/4] h-full w-full object-cover"
+                  />
+                </div>
+                <FramedPhoto
+                  photo={PHOTOS.cabalgataPotrero}
+                  sizes="(min-width: 1024px) 160px, 33vw"
+                  className="aspect-[3/4] relative"
+                />
+              </div>
+            </Reveal>
+          </div>
+          <SafeSection what="las cabalgatas" fallback={<CardGridSkeleton count={2} />}>
+            <FeaturedRides />
+          </SafeSection>
+        </Container>
       </section>
 
       {/* Productos */}
-      <section className="py-20">
+      <section className="pb-20">
         <Container>
           <SectionHeading eyebrow="Hecho en la finca" title="Para llevar a casa">
-            Miel, café, quesos y artesanías de la vereda. Agrégalos a tu solicitud y te los tenemos
-            listos.
+            Sabores y artesanías de la región. Agrégalos a tu solicitud y te los tenemos listos.
           </SectionHeading>
           <SafeSection what="los productos" fallback={<CardGridSkeleton count={4} />}>
             <FeaturedProducts />
@@ -230,19 +406,27 @@ export default function HomePage() {
       {/* Ubicación y contacto */}
       <section>
         <Container>
-          <div className="card-papel relative overflow-hidden p-8 sm:p-12">
-            <Leaf className="absolute -right-6 -top-6 size-40 rotate-12 text-musgo/15" />
-            <div className="relative max-w-2xl">
-              <p className="font-hand text-2xl text-arcilla-700">Te esperamos</p>
-              <h2 className="text-3xl font-semibold sm:text-4xl">¿Cómo llegar al rancho?</h2>
+          <div className="relative isolate overflow-hidden rounded-[var(--radius-organico)] bg-selva shadow-calida-lg">
+            <Image
+              src={PHOTOS.terrazaCabana.src}
+              alt=""
+              fill
+              placeholder="blur"
+              sizes="(min-width: 1152px) 1104px, 100vw"
+              className="-z-20 object-cover object-[50%_60%]"
+            />
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-selva via-selva/85 to-selva/30" />
+            <div className="max-w-xl p-8 sm:p-12 lg:py-16">
+              <p className="font-hand text-2xl text-ambar">Te esperamos</p>
+              <h2 className="text-3xl font-semibold text-papel-claro sm:text-4xl">¿Cómo llegar al rancho?</h2>
               <Suspense fallback={<p className="mt-4 h-7" />}>
                 <LocationBlurb />
               </Suspense>
               <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Link href="/contacto" className={buttonStyles.primary}>
+                <Link href="/contacto" className={buttonStyles.amber}>
                   <MapPin className="size-5" aria-hidden /> Ver ubicación y contacto
                 </Link>
-                <Link href="/solicitud" className={buttonStyles.outline}>
+                <Link href="/solicitud" className={lightButton}>
                   Revisar mi solicitud
                 </Link>
               </div>
@@ -253,4 +437,3 @@ export default function HomePage() {
     </>
   );
 }
-

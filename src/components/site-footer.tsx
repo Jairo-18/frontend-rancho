@@ -4,7 +4,7 @@ import { connection } from 'next/server';
 import { getSettings } from '@/lib/api';
 import { whatsappUrl } from '@/lib/whatsapp';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from './brand-icons';
-import { Horseshoe, MountainsEdge } from './decor';
+import { CanopyEdge, Monstera } from './decor';
 import { WhatsAppFloat } from './whatsapp-float';
 
 export async function SiteFooter() {
@@ -20,16 +20,16 @@ export async function SiteFooter() {
   return (
     <>
       <footer className="mt-24">
-        <MountainsEdge className="text-madera-900" />
-        <div className="veta-madera pb-24 pt-10 text-arena lg:pb-10">
+        <CanopyEdge className="-mb-px text-selva" />
+        <div className="follaje pb-24 pt-10 text-arena lg:pb-10">
           <div className="mx-auto grid max-w-6xl gap-10 px-4 sm:px-6 md:grid-cols-3">
             <div>
               <p className="flex items-center gap-2 font-display text-2xl text-papel-claro">
-                <Horseshoe className="size-7 text-arcilla" /> {settings.hotelName}
+                <Monstera className="size-7 text-ambar" /> {settings.hotelName}
               </p>
               <p className="mt-3 max-w-xs leading-relaxed text-arena/90">
-                Cabañas entre montañas, cabalgatas y productos de la finca. Ven a desconectarte con el
-                sonido del bosque.
+                Cabañas de madera entre la selva del piedemonte amazónico, jacuzzi, cabalgatas y noches
+                para dos. Ven a desconectarte con el sonido del bosque.
               </p>
             </div>
 

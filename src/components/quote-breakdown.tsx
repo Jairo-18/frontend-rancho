@@ -24,7 +24,7 @@ export function QuoteBreakdown({ quote }: { quote: Quote }) {
         {quote.nights.map((night) => {
           const { className, Icon } = TYPE_STYLE[night.type];
           return (
-            <tr key={night.date} className="border-t border-dashed border-madera/20">
+            <tr key={night.date} className="border-t border-dashed border-bosque/20">
               <td className="py-2.5 pr-2 font-semibold whitespace-nowrap">{formatDate(night.date)}</td>
               <td className={`py-2.5 pr-2 ${className}`}>
                 <span className="inline-flex items-center gap-1 font-bold">

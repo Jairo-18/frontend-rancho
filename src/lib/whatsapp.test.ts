@@ -25,6 +25,7 @@ const quote: Quote = {
 };
 
 const selection: RequestSelection = {
+  name: '',
   room: { id: 'room-1', slug: 'cabana-del-roble', name: 'Cabaña del Roble', hasJacuzzi: true },
   checkIn: '2026-10-24',
   checkOut: '2026-10-26',
@@ -46,33 +47,59 @@ describe('formato', () => {
 });
 
 describe('buildRequestMessage', () => {
-  it('arma el mensaje del ejemplo de CONTEXT §3.5', () => {
-    expect(buildRequestMessage(selection, quote, 'Cabañas')).toBe(
+  it('saluda con el nombre limpio de quien escribe', () => {
+    const message = buildRequestMessage({ ...selection, name: '  Ana   María ' }, quote, 'Cabañas');
+    expect(message).toContain('Hola, soy *Ana María*. Me gustaría consultar este plan:');
+  });
+
+  it('arma el mensaje por secciones con formato de WhatsApp', () => {
+    expect(buildRequestMessage({ ...selection, name: 'Jairo' }, quote, 'Cabañas')).toBe(
       [
-        'Hola, quiero consultar disponibilidad:',
-        '🏡 Cabaña: Cabaña del Roble (con jacuzzi)',
-        '📅 Entrada: sáb 24 oct 2026 · Salida: lun 26 oct 2026 (2 noches)',
-        '👥 Personas: 2',
-        '🐎 Cabalgata: Cabalgata al atardecer x2 personas (precio por confirmar)',
-        '🛍️ Productos: Miel de abeja x1',
-        '💰 Total estimado: $728.000 COP',
-        '(sujeto a confirmación por el hotel; no incluye lo que tiene precio por confirmar)',
-        '¡Gracias!',
+        '*RANCHO PORVENIR*',
+        '_Consulta de disponibilidad_',
+        '━━━━━━━━━━━━━━━',
+        '',
+        'Hola, soy *Jairo*. Me gustaría consultar este plan:',
+        '',
+        '*▸ Cabaña*',
+        'Cabaña del Roble _(con jacuzzi)_',
+        'Entrada: sáb 24 oct 2026',
+        'Salida: lun 26 oct 2026',
+        '2 noches · 2 personas',
+        'Subtotal: $700.000',
+        '',
+        '*▸ Cabalgatas*',
+        '- Cabalgata al atardecer × 2 personas — _precio por confirmar_',
+        '',
+        '*▸ Productos*',
+        '- Miel de abeja × 1 — $28.000',
+        '',
+        '━━━━━━━━━━━━━━━',
+        '*Total estimado: $728.000 COP*',
+        '_Sujeto a confirmación del hotel. No incluye lo que tiene precio por confirmar._',
+        '',
+        '¡Gracias! Quedo atento(a) a su respuesta.',
       ].join('\n'),
     );
   });
 
-  it('cabalgata con precio suma al total; respeta el rótulo "Habitación"', () => {
+  it('sin emojis fuera del plano básico (wa.me los rompe en "�")', () => {
+    const message = buildRequestMessage({ ...selection, name: 'Ana' }, quote, 'Cabañas');
+    expect([...message].every((char) => (char.codePointAt(0) ?? 0) <= 0xffff)).toBe(true);
+  });
+
+  it('cabalgata con precio suma al total; respeta el rótulo "Habitación" y el nombre del hotel', () => {
     const priced: RequestSelection = {
       ...selection,
       room: { ...selection.room!, hasJacuzzi: false },
       horseback: [{ id: 'h2', name: 'Ruta de la quebrada', pricePerPerson: 70000, people: 3 }],
       products: [],
     };
-    const message = buildRequestMessage(priced, quote, 'Habitaciones');
-    expect(message).toContain('🏡 Habitación: Cabaña del Roble\n');
-    expect(message).toContain('🐎 Cabalgata: Ruta de la quebrada x3 personas · $210.000');
-    expect(message).toContain('💰 Total estimado: $910.000 COP\n(sujeto a confirmación por el hotel)\n');
+    const message = buildRequestMessage(priced, quote, 'Habitaciones', 'Finca Azul');
+    expect(message.startsWith('*FINCA AZUL*\n')).toBe(true);
+    expect(message).toContain('*▸ Habitación*\nCabaña del Roble\n');
+    expect(message).toContain('- Ruta de la quebrada × 3 personas — $210.000');
+    expect(message).toContain('*Total estimado: $910.000 COP*\n_Sujeto a confirmación del hotel._\n');
     expect(message).not.toContain('Productos');
   });
 
@@ -83,7 +110,7 @@ describe('buildRequestMessage', () => {
       oneNight,
       'Cabañas',
     );
-    expect(message).toContain('(1 noche)');
+    expect(message).toContain('1 noche · 2 personas');
     expect(message).not.toContain('Total');
   });
 });
@@ -103,6 +130,7 @@ describe('computeTotals', () => {
 describe('isSelectionEmpty', () => {
   it('vacía solo si no hay cabaña, cabalgatas ni productos', () => {
     const empty: RequestSelection = {
+      name: '',
       room: null,
       checkIn: null,
       checkOut: null,

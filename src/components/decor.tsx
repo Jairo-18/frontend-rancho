@@ -1,6 +1,8 @@
+import { useId } from 'react';
+
 /**
- * Ilustraciones SVG ligeras en la paleta del rancho (CONTEXT §7): ramas, hojas,
- * montañas, herraduras y caballos. Todas decorativas (`aria-hidden`).
+ * Ilustraciones SVG ligeras en la paleta del rancho (CONTEXT §7): hojas de
+ * selva, ramas, follaje y montañas. Todas decorativas (`aria-hidden`).
  */
 
 interface DecorProps {
@@ -21,36 +23,38 @@ function Branch({ className = '' }: DecorProps) {
   );
 }
 
-/** Separador: rama con hojas a ambos lados de una herradura. */
+/** Separador: rama con hojas a ambos lados de una hoja de monstera. */
 export function BranchDivider({ className = '' }: DecorProps) {
   return (
     <div className={`flex items-center justify-center gap-3 text-musgo ${className}`} aria-hidden>
       <Branch className="h-5 w-28 sm:w-40" />
-      <Horseshoe className="h-7 w-7 shrink-0 text-arcilla" />
+      <Monstera className="h-7 w-7 shrink-0 text-arcilla" />
       <Branch className="h-5 w-28 -scale-x-100 sm:w-40" />
     </div>
   );
 }
 
-export function Horseshoe({ className = '' }: DecorProps) {
+/**
+ * Hoja de monstera: la marca del rancho. Las rasgaduras se recortan con una
+ * máscara, así la hoja se ve bien sobre cualquier fondo.
+ */
+export function Monstera({ className = '' }: DecorProps) {
+  const mask = `monstera-${useId().replace(/:/g, '')}`;
   return (
-    <svg viewBox="0 0 32 32" className={className} fill="none" aria-hidden>
-      <path
-        d="M8 27V15a8 8 0 0 1 16 0v12"
-        stroke="currentColor"
-        strokeWidth="4.5"
-        strokeLinecap="round"
-      />
-      {[
-        [8, 17],
-        [8.6, 22],
-        [24, 17],
-        [23.4, 22],
-        [11, 10],
-        [21, 10],
-      ].map(([cx, cy]) => (
-        <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r="0.9" fill="var(--color-papel-claro)" />
-      ))}
+    <svg viewBox="0 0 32 32" className={className} aria-hidden>
+      <mask id={mask}>
+        <path
+          d="M16 30C6.5 27.5 2.5 19 5 11.5 7.5 4.5 14 2.5 16 7c2-4.5 8.5-2.5 11 4.5 2.5 7.5-1.5 16-11 18.5z"
+          fill="white"
+        />
+        <g stroke="black" strokeWidth="1.7" strokeLinecap="round">
+          <path d="M16 8.5V29" strokeWidth="1.1" />
+          <path d="M4.5 13.5 11 15.5M5 20.5l7-1.5M8.5 26l5-3.5M27.5 13.5 21 15.5M27 20.5l-7-1.5M23.5 26l-5-3.5" />
+        </g>
+        <circle cx="10.5" cy="11" r="1.3" fill="black" />
+        <circle cx="21.5" cy="11" r="1.3" fill="black" />
+      </mask>
+      <rect width="32" height="32" fill="currentColor" mask={`url(#${mask})`} />
     </svg>
   );
 }
@@ -80,6 +84,40 @@ export function MountainsEdge({ className = '' }: DecorProps) {
       />
       <path
         d="M0 90V70l120-24 100 22 140-30 110 34 150-26 120 30 130-36 140 32 110-18 120 26 100-12 L1440 70 V90 H0z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+/**
+ * Borde de copas de árboles para cerrar secciones (el color lo da `text-*`).
+ * Dos capas de follaje a distinta altura, como la selva vista de lejos.
+ */
+export function CanopyEdge({ className = '' }: DecorProps) {
+  const layer = (widths: number[], base: number, rise: number) => {
+    let x = 0;
+    let d = `M0 90V${base}`;
+    for (const [i, w] of widths.entries()) {
+      const h = rise + ((i * 7) % 4) * 6;
+      d += `c${w * 0.15}-${h} ${w * 0.85}-${h} ${w} 0`;
+      x += w;
+    }
+    return `${d}L${x} 90z`;
+  };
+  return (
+    <svg
+      viewBox="0 0 1440 90"
+      preserveAspectRatio="none"
+      className={`block h-12 w-full sm:h-16 ${className}`}
+      aria-hidden
+    >
+      <path
+        d={layer([70, 110, 90, 130, 80, 120, 100, 90, 140, 80, 110, 95, 125, 100], 52, 26)}
+        fill="var(--color-musgo)"
+      />
+      <path
+        d={layer([95, 80, 125, 100, 90, 140, 85, 115, 100, 130, 90, 120, 100, 70], 68, 20)}
         fill="currentColor"
       />
     </svg>

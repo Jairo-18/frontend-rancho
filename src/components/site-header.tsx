@@ -4,7 +4,7 @@ import { connection } from 'next/server';
 import type { ReactNode } from 'react';
 import { DEFAULT_SETTINGS, getSettings } from '@/lib/api';
 import type { Settings } from '@/lib/types';
-import { Horseshoe } from './decor';
+import { Monstera } from './decor';
 import { SiteNav } from './site-nav';
 
 function navLinks(settings: Settings) {
@@ -19,19 +19,19 @@ function navLinks(settings: Settings) {
 
 function HeaderShell({ settings, nav }: { settings: Settings; nav: ReactNode }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-madera/15 bg-papel/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-papel/10 bg-selva/95 backdrop-blur-md">
       <a
         href="#contenido"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-full focus:bg-bosque focus:px-4 focus:py-2 focus:text-papel-claro"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-3 focus:z-50 focus:rounded-full focus:bg-ambar focus:px-4 focus:py-2 focus:text-selva"
       >
         Saltar al contenido
       </a>
       <div className="relative mx-auto flex h-18 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" className="group flex items-center gap-2.5" aria-label={`${settings.hotelName}, inicio`}>
-          <span className="grid size-10 place-items-center rounded-full bg-bosque text-arena transition-transform duration-300 group-hover:-rotate-12">
-            <Horseshoe className="size-6" />
+        <Link href="/" className="group flex min-w-0 items-center gap-2.5" aria-label={`${settings.hotelName}, inicio`}>
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-selva-700 text-ambar transition-transform duration-300 group-hover:-rotate-12">
+            <Monstera className="size-6" />
           </span>
-          <span className="font-display text-lg font-semibold leading-tight text-bosque min-[400px]:text-xl sm:text-2xl">
+          <span className="whitespace-nowrap font-display text-xl font-semibold leading-tight text-papel-claro sm:text-2xl">
             {settings.hotelName}
           </span>
         </Link>
@@ -61,17 +61,17 @@ export function HeaderFallback() {
         <nav aria-label="Principal" className="flex items-center gap-1">
           <span className="hidden items-center gap-1 lg:flex">
             {navLinks(DEFAULT_SETTINGS).map((link) => (
-              <Link key={link.href} href={link.href} className="rounded-full px-3.5 py-2 font-semibold text-tinta-suave">
+              <Link key={link.href} href={link.href} className="rounded-full px-3.5 py-2 font-semibold text-papel/80">
                 {link.label}
               </Link>
             ))}
           </span>
           <Link
             href="/solicitud"
-            className="ml-3 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-bosque px-3.5 py-2 text-sm font-bold text-papel-claro sm:px-4"
+            className="ml-3 inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ambar px-3.5 py-2 text-sm font-bold text-selva sm:px-4"
           >
             <ClipboardList className="size-4" aria-hidden />
-            <span className="max-[400px]:sr-only">Mi solicitud</span>
+            <span className="max-sm:sr-only">Mi solicitud</span>
           </Link>
         </nav>
       }

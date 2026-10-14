@@ -9,6 +9,9 @@ export const buttonStyles = {
   primary:
     'inline-flex items-center justify-center gap-2 rounded-full bg-bosque px-6 py-3 font-bold text-papel-claro shadow-calida transition duration-200 hover:-translate-y-0.5 hover:bg-bosque-900 hover:shadow-calida-lg disabled:pointer-events-none disabled:opacity-60',
   clay: 'inline-flex items-center justify-center gap-2 rounded-full bg-arcilla-700 px-6 py-3 font-bold text-papel-claro shadow-calida transition duration-200 hover:-translate-y-0.5 hover:bg-madera hover:shadow-calida-lg disabled:pointer-events-none disabled:opacity-60',
+  /** Luz de bombillo: CTA principal sobre fondos oscuros de selva. */
+  amber:
+    'inline-flex items-center justify-center gap-2 rounded-full bg-ambar px-6 py-3 font-bold text-selva shadow-calida transition duration-200 hover:-translate-y-0.5 hover:bg-ambar-claro hover:shadow-calida-lg disabled:pointer-events-none disabled:opacity-60',
   outline:
     'inline-flex items-center justify-center gap-2 rounded-full border-2 border-bosque px-6 py-2.5 font-bold text-bosque transition duration-200 hover:-translate-y-0.5 hover:bg-bosque hover:text-papel-claro disabled:pointer-events-none disabled:opacity-60',
   whatsapp:

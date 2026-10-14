@@ -3,8 +3,10 @@ import { connection } from 'next/server';
 import { ProductCard } from '@/components/cards';
 import { Reveal } from '@/components/reveal';
 import { SafeSection } from '@/components/safe-section';
-import { CardGridSkeleton, Container, EmptyState, SectionHeading } from '@/components/ui';
+import { PageBanner } from '@/components/page-banner';
+import { CardGridSkeleton, Container, EmptyState } from '@/components/ui';
 import { getProducts } from '@/lib/api';
+import { PHOTOS } from '@/lib/photos';
 
 export const metadata: Metadata = {
   title: 'Productos de la finca',
@@ -30,14 +32,16 @@ async function ProductList() {
 
 export default function ProductsPage() {
   return (
-    <Container className="py-14 sm:py-20">
-      <SectionHeading as="h1" eyebrow="Hecho en la finca" title="Productos">
+    <>
+      <PageBanner photo={PHOTOS.picadaTerraza} position="50% 70%" eyebrow="Hecho en la finca" title="Productos">
         Lo que producimos en el rancho y lo que hacen nuestros vecinos de la vereda. No vendemos en
         línea: agrégalos a tu solicitud y te los tenemos listos en tu visita.
-      </SectionHeading>
-      <SafeSection what="los productos" fallback={<CardGridSkeleton count={4} />}>
-        <ProductList />
-      </SafeSection>
-    </Container>
+      </PageBanner>
+      <Container className="py-12 sm:py-16">
+        <SafeSection what="los productos" fallback={<CardGridSkeleton count={4} />}>
+          <ProductList />
+        </SafeSection>
+      </Container>
+    </>
   );
 }

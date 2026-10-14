@@ -7,6 +7,7 @@ import type {
   RequestRoom,
   RequestSelection,
 } from './whatsapp';
+import { MAX_NAME_LENGTH } from './whatsapp';
 
 /**
  * "Mi solicitud": vive SOLO en el navegador (CONTEXT §3.5). Se guarda en
@@ -19,6 +20,7 @@ export const MAX_GUESTS = 30;
 export const MAX_QUANTITY = 50;
 
 const EMPTY: RequestSelection = {
+  name: '',
   room: null,
   checkIn: null,
   checkOut: null,
@@ -46,7 +48,10 @@ function hydrate(): void {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     const parsed: unknown = raw ? JSON.parse(raw) : null;
-    if (isSelection(parsed)) state = { ...EMPTY, ...parsed };
+    if (isSelection(parsed)) {
+      state = { ...EMPTY, ...parsed };
+      if (typeof state.name !== 'string') state = { ...state, name: '' };
+    }
   } catch {
     /* almacenamiento no disponible o dato corrupto: se empieza vacío */
   }
@@ -101,6 +106,9 @@ export function countItems(selection: RequestSelection): number {
 }
 
 export const requestActions = {
+  setName(name: string): void {
+    setState((s) => ({ ...s, name: name.slice(0, MAX_NAME_LENGTH) }));
+  },
   setRoom(room: RequestRoom, dates?: { checkIn: string; checkOut: string }): void {
     setState((s) => ({ ...s, room, ...(dates ?? {}) }));
   },
@@ -150,7 +158,8 @@ export const requestActions = {
   removeProduct(id: string): void {
     setState((s) => ({ ...s, products: s.products.filter((p) => p.id !== id) }));
   },
+  /** Vacía la selección; el nombre se conserva (es de la persona, no del plan). */
   clear(): void {
-    setState(() => EMPTY);
+    setState((s) => ({ ...EMPTY, name: s.name }));
   },
 };

@@ -17,7 +17,7 @@ import { createContext, type ReactNode, useContext, useEffect, useState } from '
 import { logout } from '@/lib/admin-api';
 import type { SessionUser, Settings } from '@/lib/types';
 import { useAdminData } from '@/lib/use-admin-data';
-import { HorseSilhouette, Horseshoe } from '../decor';
+import { HorseSilhouette, Monstera } from '../decor';
 import { ToastProvider } from './toast';
 
 interface AdminContextValue {
@@ -121,7 +121,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const brand = (
     <Link href="/admin" className="flex items-center gap-2.5">
       <span className="grid size-9 place-items-center rounded-full bg-papel-claro text-bosque">
-        <Horseshoe className="size-5" />
+        <Monstera className="size-5" />
       </span>
       <span className="leading-tight">
         <span className="block font-display text-lg text-papel-claro">

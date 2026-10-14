@@ -17,12 +17,12 @@ function RequestLink({ onClick }: { onClick?: () => void }) {
     <Link
       href="/solicitud"
       onClick={onClick}
-      className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-bosque px-3.5 py-2 text-sm font-bold text-papel-claro shadow-calida transition duration-200 hover:-translate-y-0.5 hover:bg-bosque-900 sm:px-4"
+      className="relative inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ambar px-3.5 py-2 text-sm font-bold text-selva shadow-calida transition duration-200 hover:-translate-y-0.5 hover:bg-ambar-claro sm:px-4"
     >
       <ClipboardList className="size-4" aria-hidden />
-      <span className="max-[400px]:sr-only">Mi solicitud</span>
+      <span className="max-sm:sr-only">Mi solicitud</span>
       {count > 0 && (
-        <span className="grid min-w-5 place-items-center rounded-full bg-arcilla px-1.5 text-xs leading-5 text-papel-claro">
+        <span className="grid min-w-5 place-items-center rounded-full bg-selva px-1.5 text-xs leading-5 text-ambar">
           {count}
           <span className="sr-only"> {count === 1 ? 'ítem' : 'ítems'}</span>
         </span>
@@ -56,7 +56,7 @@ export function SiteNav({ links }: { links: NavLink[] }) {
             key={link.href}
             href={link.href}
             aria-current={isActive(link.href) ? 'page' : undefined}
-            className="rounded-full px-3.5 py-2 font-semibold text-tinta-suave transition-colors duration-200 hover:bg-arena/60 hover:text-bosque aria-[current=page]:text-bosque aria-[current=page]:underline aria-[current=page]:decoration-arcilla aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
+            className="rounded-full px-3.5 py-2 font-semibold text-papel/80 transition-colors duration-200 hover:bg-papel/10 hover:text-papel-claro aria-[current=page]:text-papel-claro aria-[current=page]:underline aria-[current=page]:decoration-ambar aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
           >
             {link.label}
           </Link>
@@ -73,7 +73,7 @@ export function SiteNav({ links }: { links: NavLink[] }) {
           onClick={() => setOpen(!open)}
           aria-expanded={open}
           aria-controls="menu-movil"
-          className="grid size-11 place-items-center rounded-full text-bosque hover:bg-arena/60"
+          className="grid size-11 place-items-center rounded-full text-papel-claro hover:bg-papel/10"
         >
           {open ? <X className="size-6" aria-hidden /> : <Menu className="size-6" aria-hidden />}
           <span className="sr-only">{open ? 'Cerrar menú' : 'Abrir menú'}</span>
@@ -84,7 +84,7 @@ export function SiteNav({ links }: { links: NavLink[] }) {
         <nav
           id="menu-movil"
           aria-label="Principal"
-          className="absolute inset-x-0 top-full border-b border-madera/15 bg-papel-claro px-4 pb-6 pt-2 shadow-calida-lg lg:hidden"
+          className="absolute inset-x-0 top-full border-b border-papel/10 bg-selva px-4 pb-6 pt-2 shadow-calida-lg lg:hidden"
         >
           <ul className="flex flex-col">
             {links.map((link) => (
@@ -92,7 +92,7 @@ export function SiteNav({ links }: { links: NavLink[] }) {
                 <Link
                   href={link.href}
                   aria-current={isActive(link.href) ? 'page' : undefined}
-                  className="block border-b border-dashed border-madera/20 py-3.5 font-display text-xl text-bosque aria-[current=page]:text-arcilla-700"
+                  className="block border-b border-dashed border-papel/15 py-3.5 font-display text-xl text-papel-claro aria-[current=page]:text-ambar"
                 >
                   {link.label}
                 </Link>

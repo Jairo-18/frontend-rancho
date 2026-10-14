@@ -17,31 +17,32 @@ const caveat = Caveat({ variable: '--font-caveat', subsets: ['latin'], weight: [
 const SITE_URL = process.env.SITE_URL ?? 'http://localhost:3000';
 const SITE_NAME = 'Rancho Porvenir';
 const DESCRIPTION =
-  'Hotel rancho ecológico: cabañas entre montañas, jacuzzi, cabalgatas y productos de la finca. Arma tu plan y consúltalo por WhatsApp.';
+  'Cabañas de madera entre la selva de Mocoa, Putumayo: jacuzzi, cabalgatas, planes románticos y productos de la finca. Arma tu plan y consúltalo por WhatsApp.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: `${SITE_NAME} · Hotel rancho ecológico`, template: `%s · ${SITE_NAME}` },
+  title: { default: `${SITE_NAME} · Cabañas en la selva de Mocoa`, template: `%s · ${SITE_NAME}` },
   description: DESCRIPTION,
   applicationName: SITE_NAME,
   openGraph: {
     type: 'website',
     locale: 'es_CO',
     siteName: SITE_NAME,
-    title: `${SITE_NAME} · Hotel rancho ecológico`,
+    title: `${SITE_NAME} · Cabañas en la selva de Mocoa`,
     description: DESCRIPTION,
   },
   twitter: { card: 'summary_large_image' },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#2f4a2b',
+  themeColor: '#0a3a27',
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html
       lang="es-CO"
+      data-scroll-behavior="smooth"
       className={`${fraunces.variable} ${nunito.variable} ${caveat.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">{children}</body>

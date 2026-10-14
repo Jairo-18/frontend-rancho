@@ -1,14 +1,23 @@
 'use client';
 
-import { ArrowRight, BedDouble, LoaderCircle, ShoppingBasket, Trash2, Users } from 'lucide-react';
+import { ArrowRight, BedDouble, LoaderCircle, ShoppingBasket, Trash2, UserRound, Users } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { formatDate, formatMoney, nightsBetween, pluralize, singularLabel } from '@/lib/format';
 import { MAX_GUESTS, MAX_QUANTITY, requestActions, useRequest } from '@/lib/request-store';
 import type { Settings } from '@/lib/types';
 import { useQuote } from '@/lib/use-quote';
-import { buildRequestMessage, computeTotals, isSelectionEmpty, whatsappUrl } from '@/lib/whatsapp';
+import {
+  buildRequestMessage,
+  cleanName,
+  computeTotals,
+  isSelectionEmpty,
+  MAX_NAME_LENGTH,
+  MIN_NAME_LENGTH,
+  whatsappUrl,
+} from '@/lib/whatsapp';
 import { WhatsAppIcon } from './brand-icons';
+import { WhatsAppPreview } from './whatsapp-preview';
 import { HorseSilhouette, Leaf } from './decor';
 import { DateFields } from './price-calculator';
 import { QuoteBreakdown } from './quote-breakdown';
@@ -84,14 +93,38 @@ export function RequestSummary({ settings }: { settings: Settings }) {
     );
   }
 
+  const nameMissing = cleanName(selection.name).length < MIN_NAME_LENGTH;
   const roomMissing = !selection.room;
   const datesMissing = Boolean(selection.room) && !hasDates;
-  const message = buildRequestMessage(selection, readyQuote, settings.roomLabel);
-  const canSend = Boolean(settings.whatsappNumber) && !roomMissing && !datesMissing && quote.status !== 'loading';
+  const message = buildRequestMessage(selection, readyQuote, settings.roomLabel, settings.hotelName);
+  const canSend =
+    Boolean(settings.whatsappNumber) && !nameMissing && !roomMissing && !datesMissing && quote.status !== 'loading';
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
       <div className="space-y-6">
+        <Block title="Tus datos" icon={<UserRound className={ICON} aria-hidden />}>
+          <label htmlFor="solicitud-nombre" className="font-bold">
+            ¿A nombre de quién?
+          </label>
+          <input
+            id="solicitud-nombre"
+            type="text"
+            autoComplete="name"
+            required
+            maxLength={MAX_NAME_LENGTH}
+            value={selection.name}
+            onChange={(event) => requestActions.setName(event.target.value)}
+            placeholder="Tu nombre"
+            aria-describedby="solicitud-nombre-ayuda"
+            className="mt-2 w-full rounded-2xl border-2 border-arena bg-papel-claro px-4 py-3 text-lg outline-none transition focus:border-bosque"
+          />
+          <p id="solicitud-nombre-ayuda" className="mt-2 text-sm text-tinta-suave">
+            Va al inicio del mensaje para saber con quién hablamos. No lo guardamos: solo queda en tu
+            navegador.
+          </p>
+        </Block>
+
         <Block title={roomSingular} icon={<BedDouble className={ICON} aria-hidden />}>
           {selection.room ? (
             <div className="space-y-5">
@@ -156,7 +189,7 @@ export function RequestSummary({ settings }: { settings: Settings }) {
           {selection.horseback.length === 0 ? (
             <p className="text-tinta-suave">Sin cabalgatas. ¿Te animas a una al atardecer?</p>
           ) : (
-            <ul className="divide-y divide-dashed divide-madera/20">
+            <ul className="divide-y divide-dashed divide-bosque/20">
               {selection.horseback.map((ride) => (
                 <li key={ride.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                   <div className="min-w-0 flex-1">
@@ -188,7 +221,7 @@ export function RequestSummary({ settings }: { settings: Settings }) {
           {selection.products.length === 0 ? (
             <p className="text-tinta-suave">Sin productos por ahora.</p>
           ) : (
-            <ul className="divide-y divide-dashed divide-madera/20">
+            <ul className="divide-y divide-dashed divide-bosque/20">
               {selection.products.map((product) => (
                 <li key={product.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
                   <div className="min-w-0 flex-1">
@@ -214,7 +247,7 @@ export function RequestSummary({ settings }: { settings: Settings }) {
       {/* Resumen y envío */}
       <aside className="lg:sticky lg:top-24" aria-label="Total y envío">
         <div className="card-papel overflow-hidden">
-          <div className="veta-madera px-6 py-5 text-papel-claro">
+          <div className="follaje px-6 py-5 text-papel-claro">
             <h2 className="text-2xl text-papel-claro">Total estimado</h2>
             <p className="mt-1 font-display text-4xl font-semibold" aria-live="polite">
               {formatMoney(totals.total)}
@@ -244,7 +277,7 @@ export function RequestSummary({ settings }: { settings: Settings }) {
               </div>
             )}
             {selection.checkIn && selection.checkOut && hasDates && (
-              <p className="border-t border-dashed border-madera/25 pt-3 text-tinta-suave">
+              <p className="border-t border-dashed border-bosque/25 pt-3 text-tinta-suave">
                 {formatDate(selection.checkIn)} → {formatDate(selection.checkOut)}
               </p>
             )}
@@ -273,7 +306,9 @@ export function RequestSummary({ settings }: { settings: Settings }) {
               <p className="text-center text-sm font-semibold text-arcilla-700">
                 {!settings.whatsappNumber
                   ? 'El hotel aún no configuró su WhatsApp.'
-                  : roomMissing
+                  : nameMissing
+                    ? 'Escribe tu nombre para enviar.'
+                    : roomMissing
                     ? `Elige una ${roomSingular.toLowerCase()} para enviar.`
                     : datesMissing
                       ? 'Elige las fechas para enviar.'
@@ -292,10 +327,9 @@ export function RequestSummary({ settings }: { settings: Settings }) {
           </div>
         </div>
 
-        <details className="mt-4 rounded-2xl bg-arena/50 px-5 py-3 text-sm">
-          <summary className="cursor-pointer font-bold text-bosque">Ver el mensaje que se enviará</summary>
-          <pre className="mt-3 whitespace-pre-wrap font-sans leading-relaxed">{message}</pre>
-        </details>
+        <div className="mt-6">
+          <WhatsAppPreview message={message} hotelName={settings.hotelName} />
+        </div>
       </aside>
     </div>
   );

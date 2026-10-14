@@ -4,8 +4,10 @@ import { connection } from 'next/server';
 import { Suspense } from 'react';
 import { WhatsAppIcon } from '@/components/brand-icons';
 import { Leaf } from '@/components/decor';
-import { buttonStyles, Container, SectionHeading } from '@/components/ui';
+import { PageBanner } from '@/components/page-banner';
+import { buttonStyles, Container } from '@/components/ui';
 import { getSettings } from '@/lib/api';
+import { PHOTOS } from '@/lib/photos';
 import { whatsappUrl } from '@/lib/whatsapp';
 
 export const metadata: Metadata = {
@@ -70,7 +72,7 @@ async function ContactDetails() {
           </a>
         )}
         {rows.length > 0 && (
-          <ul className="mt-7 space-y-3 border-t border-dashed border-madera/25 pt-6">
+          <ul className="mt-7 space-y-3 border-t border-dashed border-bosque/25 pt-6">
             {rows.map(({ Icon, label, value, href }) => (
               <li key={label}>
                 <a href={href} className="inline-flex items-center gap-3 font-semibold hover:text-arcilla-700">
@@ -93,11 +95,15 @@ async function ContactDetails() {
 
 export default function ContactPage() {
   return (
-    <Container className="py-14 sm:py-20">
-      <SectionHeading as="h1" eyebrow="Te esperamos" title="Cómo llegar" />
-      <Suspense fallback={<div className="h-80 animate-pulse rounded-3xl bg-arena/60" aria-busy="true" />}>
-        <ContactDetails />
-      </Suspense>
-    </Container>
+    <>
+      <PageBanner photo={PHOTOS.carpasNoche} position="50% 65%" eyebrow="Te esperamos" title="Cómo llegar">
+        En el piedemonte amazónico, entre montañas y bosque. Escríbenos y te guiamos en el camino.
+      </PageBanner>
+      <Container className="py-12 sm:py-16">
+        <Suspense fallback={<div className="h-80 animate-pulse rounded-3xl bg-arena/60" aria-busy="true" />}>
+          <ContactDetails />
+        </Suspense>
+      </Container>
+    </>
   );
 }

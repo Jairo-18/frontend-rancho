@@ -53,7 +53,7 @@ export function NewButton({ href, children }: { href: string; children: ReactNod
 
 export function Panel({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <section className={`rounded-2xl border border-madera/15 bg-papel-claro p-5 shadow-calida sm:p-6 ${className}`}>
+    <section className={`rounded-2xl border border-bosque/15 bg-papel-claro p-5 shadow-calida sm:p-6 ${className}`}>
       {children}
     </section>
   );

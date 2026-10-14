@@ -29,6 +29,8 @@ export interface RequestProduct {
 }
 
 export interface RequestSelection {
+  /** Nombre de quien escribe: el hotel lo ve al abrir el chat. */
+  name: string;
   room: RequestRoom | null;
   checkIn: string | null;
   checkOut: string | null;
@@ -68,53 +70,84 @@ export function isSelectionEmpty(selection: RequestSelection): boolean {
   );
 }
 
+/** Mínimo de letras del nombre para poder enviar la solicitud. */
+export const MIN_NAME_LENGTH = 2;
+export const MAX_NAME_LENGTH = 60;
+
+/** Nombre limpio: sin espacios repetidos ni en los extremos. */
+export function cleanName(name: string): string {
+  return name.replace(/\s+/g, ' ').trim().slice(0, MAX_NAME_LENGTH);
+}
+
+const RULE = '━━━━━━━━━━━━━━━';
+
+/**
+ * Mensaje con el formato propio de WhatsApp (*negrita*, _cursiva_, listas con
+ * "- "). Sin emojis fuera del plano básico de Unicode: el enlace wa.me los
+ * convierte en "�" en algunas versiones (WhatsApp Desktop/Web).
+ */
 export function buildRequestMessage(
   selection: RequestSelection,
   quote: Quote | null,
   roomLabel: RoomLabel,
+  hotelName = 'Rancho Porvenir',
 ): string {
-  const lines: string[] = ['Hola, quiero consultar disponibilidad:'];
+  const name = cleanName(selection.name);
+  const totals = computeTotals(selection, quote);
+  const lines: string[] = [
+    `*${hotelName.toUpperCase()}*`,
+    '_Consulta de disponibilidad_',
+    RULE,
+    '',
+    name ? `Hola, soy *${name}*. Me gustaría consultar este plan:` : 'Hola, me gustaría consultar este plan:',
+  ];
 
   if (selection.room) {
-    const jacuzzi = selection.room.hasJacuzzi ? ' (con jacuzzi)' : '';
-    lines.push(`🏡 ${singularLabel(roomLabel)}: ${selection.room.name}${jacuzzi}`);
+    const jacuzzi = selection.room.hasJacuzzi ? ' _(con jacuzzi)_' : '';
+    lines.push('', `*▸ ${singularLabel(roomLabel)}*`, `${selection.room.name}${jacuzzi}`);
+    if (selection.checkIn && selection.checkOut) {
+      lines.push(`Entrada: ${formatDate(selection.checkIn)}`, `Salida: ${formatDate(selection.checkOut)}`);
+    }
+    const stay = [
+      quote?.nightsCount ? pluralize(quote.nightsCount, 'noche', 'noches') : null,
+      pluralize(selection.guests, 'persona', 'personas'),
+    ].filter(Boolean);
+    lines.push(stay.join(' · '));
+    if (quote && totals.room > 0) lines.push(`Subtotal: ${formatMoney(totals.room)}`);
+  } else {
+    lines.push('', `*▸ Personas:* ${selection.guests}`);
   }
 
-  if (selection.checkIn && selection.checkOut) {
-    const nights = quote?.nightsCount;
-    const nightsText = nights ? ` (${pluralize(nights, 'noche', 'noches')})` : '';
-    lines.push(
-      `📅 Entrada: ${formatDate(selection.checkIn)} · Salida: ${formatDate(selection.checkOut)}${nightsText}`,
-    );
-  }
-
-  lines.push(`👥 Personas: ${selection.guests}`);
-
-  for (const ride of selection.horseback) {
-    const people = pluralize(ride.people, 'persona', 'personas');
-    const price =
-      ride.pricePerPerson === null
-        ? ' (precio por confirmar)'
-        : ` · ${formatMoney(ride.pricePerPerson * ride.people)}`;
-    lines.push(`🐎 Cabalgata: ${ride.name} x${people}${price}`);
+  if (selection.horseback.length > 0) {
+    lines.push('', '*▸ Cabalgatas*');
+    for (const ride of selection.horseback) {
+      const price =
+        ride.pricePerPerson === null
+          ? '_precio por confirmar_'
+          : formatMoney(ride.pricePerPerson * ride.people);
+      lines.push(`- ${ride.name} × ${pluralize(ride.people, 'persona', 'personas')} — ${price}`);
+    }
   }
 
   if (selection.products.length > 0) {
-    const items = selection.products.map((p) => `${p.name} x${p.quantity}`).join(', ');
-    lines.push(`🛍️ Productos: ${items}`);
+    lines.push('', '*▸ Productos*');
+    for (const product of selection.products) {
+      lines.push(`- ${product.name} × ${product.quantity} — ${formatMoney(product.price * product.quantity)}`);
+    }
   }
 
-  const totals = computeTotals(selection, quote);
   if (totals.total > 0) {
-    lines.push(`💰 Total estimado: ${formatMoney(totals.total)} COP`);
     lines.push(
+      '',
+      RULE,
+      `*Total estimado: ${formatMoney(totals.total)} COP*`,
       totals.hasUnpricedItems
-        ? '(sujeto a confirmación por el hotel; no incluye lo que tiene precio por confirmar)'
-        : '(sujeto a confirmación por el hotel)',
+        ? '_Sujeto a confirmación del hotel. No incluye lo que tiene precio por confirmar._'
+        : '_Sujeto a confirmación del hotel._',
     );
   }
 
-  lines.push('¡Gracias!');
+  lines.push('', '¡Gracias! Quedo atento(a) a su respuesta.');
   return lines.join('\n');
 }
 

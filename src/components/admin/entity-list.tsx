@@ -56,7 +56,7 @@ export function EntityList<T extends ListItem>({
         </EmptyBlock>
       )}
       {list.status === 'ready' && list.data.length > 0 && (
-        <ul className="divide-y divide-madera/10 overflow-hidden rounded-2xl border border-madera/15 bg-papel-claro shadow-calida">
+        <ul className="divide-y divide-bosque/10 overflow-hidden rounded-2xl border border-bosque/15 bg-papel-claro shadow-calida">
           {list.data.map((item) => {
             const src = thumbnail?.(item);
             return (

@@ -199,7 +199,7 @@ export function ImageManager<T>({
       {count > 0 && (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {images.map((image, index) => (
-            <li key={image.id} className="overflow-hidden rounded-xl border border-madera/15 bg-white">
+            <li key={image.id} className="overflow-hidden rounded-xl border border-bosque/15 bg-white">
               <div className="relative aspect-[4/3]">
                 {/* eslint-disable-next-line @next/next/no-img-element -- miniaturas del panel, sin optimizar */}
                 <img src={image.url} alt={`Foto ${index + 1}`} className="h-full w-full object-cover" />
@@ -271,7 +271,7 @@ export function ImageManager<T>({
       {queue.length > 0 && (
         <ul className="space-y-2" aria-live="polite">
           {queue.map((item) => (
-            <li key={item.key} className="flex items-center gap-3 rounded-xl border border-madera/15 bg-white p-2">
+            <li key={item.key} className="flex items-center gap-3 rounded-xl border border-bosque/15 bg-white p-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- vista previa local (blob:) */}
               <img src={item.preview} alt="" className="size-14 shrink-0 rounded-lg object-cover" />
               <div className="min-w-0 flex-1">

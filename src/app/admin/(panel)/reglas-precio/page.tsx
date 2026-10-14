@@ -58,7 +58,7 @@ export default function PriceRulesPage() {
         <EmptyBlock title="No hay reglas con ese filtro">Crea una para un festivo o una temporada.</EmptyBlock>
       )}
       {rules.status === 'ready' && rules.data.length > 0 && (
-        <ul className="divide-y divide-madera/10 overflow-hidden rounded-2xl border border-madera/15 bg-papel-claro shadow-calida">
+        <ul className="divide-y divide-bosque/10 overflow-hidden rounded-2xl border border-bosque/15 bg-papel-claro shadow-calida">
           {rules.data.map((rule) => (
             <li key={rule.id}>
               <Link href={`/admin/reglas-precio/${rule.id}`} className="flex items-center gap-3 px-4 py-3 hover:bg-arena/40">

@@ -1,16 +1,17 @@
 import type { Metadata } from 'next';
 import { connection } from 'next/server';
 import { HorsebackCard } from '@/components/cards';
-import { HorseSilhouette } from '@/components/decor';
+import { PageBanner } from '@/components/page-banner';
 import { Reveal } from '@/components/reveal';
 import { SafeSection } from '@/components/safe-section';
-import { CardGridSkeleton, Container, EmptyState, SectionHeading } from '@/components/ui';
+import { CardGridSkeleton, Container, EmptyState } from '@/components/ui';
 import { getHorsebackRides } from '@/lib/api';
+import { PHOTOS } from '@/lib/photos';
 
 export const metadata: Metadata = {
   title: 'Cabalgatas',
   description:
-    'Cabalgatas guiadas por la montaña: al atardecer, por el bosque y hasta la quebrada. Aptas para principiantes.',
+    'Cabalgatas guiadas por potreros y bosque con las montañas del Putumayo de fondo. Aptas para principiantes.',
   alternates: { canonical: '/cabalgatas' },
   openGraph: { title: 'Cabalgatas en el Rancho Porvenir', url: '/cabalgatas' },
 };
@@ -38,17 +39,16 @@ async function RideList() {
 
 export default function HorsebackPage() {
   return (
-    <Container className="py-14 sm:py-20">
-      <div className="flex justify-center text-madera/70">
-        <HorseSilhouette className="h-16 w-24" />
-      </div>
-      <SectionHeading as="h1" eyebrow="Al paso del caballo" title="Cabalgatas">
+    <>
+      <PageBanner photo={PHOTOS.cabalgataMontana} position="50% 40%" eyebrow="Entre potreros y montaña" title="Cabalgatas">
         Siempre con un guía del rancho y caballos mansos. Elige cuántas personas van y agrégala a tu
         solicitud; si aún no tiene precio, te lo confirmamos por WhatsApp.
-      </SectionHeading>
-      <SafeSection what="las cabalgatas" fallback={<CardGridSkeleton count={2} />}>
-        <RideList />
-      </SafeSection>
-    </Container>
+      </PageBanner>
+      <Container className="py-12 sm:py-16">
+        <SafeSection what="las cabalgatas" fallback={<CardGridSkeleton count={2} />}>
+          <RideList />
+        </SafeSection>
+      </Container>
+    </>
   );
 }

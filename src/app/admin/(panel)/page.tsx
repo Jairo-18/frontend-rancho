@@ -28,7 +28,7 @@ function StatCard({
   return (
     <Link
       href={href}
-      className="flex items-center gap-4 rounded-2xl border border-madera/15 bg-papel-claro p-4 shadow-calida transition hover:-translate-y-0.5 hover:shadow-calida-lg"
+      className="flex items-center gap-4 rounded-2xl border border-bosque/15 bg-papel-claro p-4 shadow-calida transition hover:-translate-y-0.5 hover:shadow-calida-lg"
     >
       <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-musgo/15 text-musgo-700">{icon}</span>
       <span>
@@ -104,7 +104,7 @@ export default function AdminHomePage() {
           <p className="text-tinta-suave">No hay reglas activas próximas.</p>
         )}
         {upcoming.length > 0 && (
-          <ul className="divide-y divide-madera/10 rounded-2xl border border-madera/15 bg-papel-claro">
+          <ul className="divide-y divide-bosque/10 rounded-2xl border border-bosque/15 bg-papel-claro">
             {upcoming.map((rule) => (
               <li key={rule.id}>
                 <Link href={`/admin/reglas-precio/${rule.id}`} className="flex justify-between gap-3 px-4 py-2.5 hover:bg-arena/40">
