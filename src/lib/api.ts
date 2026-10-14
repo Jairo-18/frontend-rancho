@@ -54,6 +54,16 @@ export const DEFAULT_SETTINGS: Settings = {
   email: '',
   phone: '',
   socials: { instagram: '', facebook: '', tiktok: '' },
+  // Si la API falla: horarios y mascotas como en el portafolio del hotel; las
+  // listas (recomendaciones, normas, condiciones) se ocultan.
+  checkInTime: '3:00 p. m.',
+  checkOutTime: '12:00 m.',
+  sharedAreas: 'Cocina, kiosko, parrilla y barril asador',
+  petsPolicy:
+    'Las mascotas son bienvenidas en el rancho, pero no pueden entrar a las cabañas. Su dueño responde por su cuidado y por cualquier daño.',
+  recommendations: [],
+  houseRules: [],
+  bookingTerms: [],
 };
 
 async function fetchSettings(): Promise<Settings> {

@@ -6,6 +6,7 @@ import { Suspense } from 'react';
 import { Gallery } from '@/components/gallery';
 import { PriceCalculator } from '@/components/price-calculator';
 import { SectionBoundary } from '@/components/section-boundary';
+import { StayFacts } from '@/components/stay-info';
 import { CapacityBadge, Container, JacuzziBadge, PricePair } from '@/components/ui';
 import { getRoom, getSettings } from '@/lib/api';
 import { singularLabel } from '@/lib/format';
@@ -62,6 +63,13 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
             En festivos y temporadas especiales la tarifa puede cambiar: la calculadora te muestra el
             precio exacto de cada noche.
           </p>
+        </div>
+        <div className="max-w-lg">
+          <h2 className="mb-3 text-2xl">Bueno saber</h2>
+          <StayFacts settings={settings} />
+          <Link href="/contacto#antes-de-venir" className="mt-3 inline-block font-bold text-bosque underline underline-offset-4 hover:text-arcilla-700">
+            Recomendaciones y condiciones de reserva
+          </Link>
         </div>
       </div>
 

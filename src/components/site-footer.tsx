@@ -83,6 +83,7 @@ export async function SiteFooter() {
                 <li><Link className="hover:text-papel-claro hover:underline" href="/cabalgatas">Cabalgatas</Link></li>
                 <li><Link className="hover:text-papel-claro hover:underline" href="/productos">Productos</Link></li>
                 <li><Link className="hover:text-papel-claro hover:underline" href="/solicitud">Mi solicitud</Link></li>
+                <li><Link className="hover:text-papel-claro hover:underline" href="/contacto#antes-de-venir">Antes de venir</Link></li>
               </ul>
               {socials.length > 0 && (
                 <ul className="mt-6 flex gap-3">

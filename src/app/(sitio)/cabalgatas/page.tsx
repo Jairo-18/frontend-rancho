@@ -41,8 +41,8 @@ export default function HorsebackPage() {
   return (
     <>
       <PageBanner photo={PHOTOS.cabalgataMontana} position="50% 40%" eyebrow="Entre potreros y montaña" title="Cabalgatas">
-        Siempre con un guía del rancho y caballos mansos. Elige cuántas personas van y agrégala a tu
-        solicitud; si aún no tiene precio, te lo confirmamos por WhatsApp.
+        Por senderos naturales, con caballo ensillado, guía, instrucciones básicas y seguro médico
+        durante el recorrido. Elige cuántas personas van y agrégala a tu solicitud.
       </PageBanner>
       <Container className="py-12 sm:py-16">
         <SafeSection what="las cabalgatas" fallback={<CardGridSkeleton count={2} />}>

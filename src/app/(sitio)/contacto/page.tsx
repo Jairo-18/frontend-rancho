@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { WhatsAppIcon } from '@/components/brand-icons';
 import { Leaf } from '@/components/decor';
 import { PageBanner } from '@/components/page-banner';
+import { StayInfo } from '@/components/stay-info';
 import { buttonStyles, Container } from '@/components/ui';
 import { getSettings } from '@/lib/api';
 import { PHOTOS } from '@/lib/photos';
@@ -12,7 +13,7 @@ import { whatsappUrl } from '@/lib/whatsapp';
 
 export const metadata: Metadata = {
   title: 'Cómo llegar y contacto',
-  description: 'Ubicación del Rancho Porvenir, cómo llegar y todos los canales para escribirnos.',
+  description: 'Ubicación del Rancho Porvenir en Mocoa, horarios de llegada y salida, recomendaciones y condiciones de reserva.',
   alternates: { canonical: '/contacto' },
   openGraph: { title: 'Cómo llegar · Rancho Porvenir', url: '/contacto' },
 };
@@ -93,6 +94,11 @@ async function ContactDetails() {
   );
 }
 
+async function StayDetails() {
+  await connection();
+  return <StayInfo settings={await getSettings()} />;
+}
+
 export default function ContactPage() {
   return (
     <>
@@ -103,6 +109,11 @@ export default function ContactPage() {
         <Suspense fallback={<div className="h-80 animate-pulse rounded-3xl bg-arena/60" aria-busy="true" />}>
           <ContactDetails />
         </Suspense>
+        <div className="mt-16">
+          <Suspense fallback={<div className="h-96 animate-pulse rounded-3xl bg-arena/60" aria-busy="true" />}>
+            <StayDetails />
+          </Suspense>
+        </div>
       </Container>
     </>
   );

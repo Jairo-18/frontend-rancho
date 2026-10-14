@@ -137,6 +137,13 @@ const optionalUrl = z
   .trim()
   .refine((v) => v === '' || /^https?:\/\/\S+$/.test(v), 'Debe ser un enlace que empiece por https://');
 
+/** Lista editada como texto (una por línea): sin líneas vacías, máx. 20 de 400 caracteres. */
+const lineList = z
+  .array(z.string())
+  .transform((items) => items.map((item) => item.trim()).filter(Boolean))
+  .refine((items) => items.length <= 20, 'Máximo 20 líneas')
+  .refine((items) => items.every((item) => item.length <= 400), 'Cada línea admite máximo 400 caracteres');
+
 export const settingsSchema = z.object({
   hotelName: requiredText('El nombre del hotel', 120),
   roomLabel: z.enum(['Cabañas', 'Habitaciones']),
@@ -156,6 +163,13 @@ export const settingsSchema = z.object({
     .refine((v) => v === '' || z.email().safeParse(v).success, 'Correo no válido'),
   phone: z.string().trim().max(30, 'Máximo 30 caracteres'),
   socials: z.object({ instagram: optionalUrl, facebook: optionalUrl, tiktok: optionalUrl }),
+  checkInTime: z.string().trim().max(40, 'Máximo 40 caracteres'),
+  checkOutTime: z.string().trim().max(40, 'Máximo 40 caracteres'),
+  sharedAreas: z.string().trim().max(250, 'Máximo 250 caracteres'),
+  petsPolicy: z.string().trim().max(500, 'Máximo 500 caracteres'),
+  recommendations: lineList,
+  houseRules: lineList,
+  bookingTerms: lineList,
 });
 export type SettingsFormValues = z.input<typeof settingsSchema>;
 

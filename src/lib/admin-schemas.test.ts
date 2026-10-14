@@ -77,9 +77,41 @@ describe('settingsSchema', () => {
       mapsUrl: 'maps.google.com',
       email: '',
       phone: '',
+      checkInTime: '3:00 p. m.',
+      checkOutTime: '12:00 m.',
+      sharedAreas: '',
+      petsPolicy: '',
+      recommendations: [],
+      houseRules: [],
+      bookingTerms: [],
       socials: { instagram: '', facebook: '', tiktok: '' },
     });
     expect(result.success).toBe(false);
     expect(fieldErrors(result.error!)).toEqual({ mapsUrl: expect.stringContaining('https://') });
+  });
+
+  it('las listas por línea quedan sin espacios ni líneas vacías', () => {
+    const parsed = settingsSchema.parse({
+      hotelName: 'Rancho Porvenir',
+      roomLabel: 'Cabañas',
+      whatsappNumber: '',
+      whatsappGreeting: '',
+      fridayNightIsWeekend: true,
+      address: '',
+      city: '',
+      mapsUrl: '',
+      email: '',
+      phone: '',
+      socials: { instagram: '', facebook: '', tiktok: '' },
+      checkInTime: '3:00 p. m.',
+      checkOutTime: '12:00 m.',
+      sharedAreas: '',
+      petsPolicy: '',
+      recommendations: ['  Trae repelente ', '', '   '],
+      houseRules: [],
+      bookingTerms: ['Saldo: al llegar'],
+    });
+    expect(parsed.recommendations).toEqual(['Trae repelente']);
+    expect(parsed.bookingTerms).toEqual(['Saldo: al llegar']);
   });
 });

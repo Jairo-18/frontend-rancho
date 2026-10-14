@@ -25,7 +25,13 @@ import { whatsappUrl } from '@/lib/whatsapp';
 function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: Settings) => void }) {
   const toast = useToast();
   const { reloadSettings } = useAdmin();
-  const [values, setValues] = useState<SettingsFormValues>(() => ({ ...settings, socials: { ...settings.socials } }));
+  const [values, setValues] = useState<SettingsFormValues>(() => ({
+    ...settings,
+    socials: { ...settings.socials },
+    recommendations: [...settings.recommendations],
+    houseRules: [...settings.houseRules],
+    bookingTerms: [...settings.bookingTerms],
+  }));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<{ message: string; details: string[] } | null>(null);
   const [saving, setSaving] = useState(false);
@@ -61,7 +67,12 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
     }
   }
 
-  const text = (key: 'hotelName' | 'address' | 'city' | 'mapsUrl' | 'email' | 'phone', label: string, hint?: string, type = 'text') => (
+  const text = (
+    key: 'hotelName' | 'address' | 'city' | 'mapsUrl' | 'email' | 'phone' | 'checkInTime' | 'checkOutTime' | 'sharedAreas',
+    label: string,
+    hint?: string,
+    type = 'text',
+  ) => (
     <Field label={label} htmlFor={`st-${key}`} error={errors[key]} hint={hint}>
       <input
         id={`st-${key}`}
@@ -72,6 +83,21 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
         {...invalidProps(`st-${key}`, errors[key])}
       />
     </Field>
+  );
+
+  const lines = (key: 'recommendations' | 'houseRules' | 'bookingTerms', label: string, hint: string) => (
+    <div className="sm:col-span-2">
+      <Field label={label} htmlFor={`st-${key}`} error={errors[key]} hint={hint}>
+        <textarea
+          id={`st-${key}`}
+          rows={Math.min(10, Math.max(3, values[key].length + 1))}
+          value={values[key].join('\n')}
+          onChange={(e) => set(key, e.target.value.split('\n'))}
+          className={inputClass}
+          {...invalidProps(`st-${key}`, errors[key])}
+        />
+      </Field>
+    </div>
   );
 
   return (
@@ -161,6 +187,34 @@ function SettingsForm({ settings, onSaved }: { settings: Settings; onSaved: (s: 
       </Panel>
 
       <Panel>
+        <h2 className="text-xl">Información para el huésped</h2>
+        <p className="mb-4 mt-1 text-sm text-tinta-suave">
+          Se muestra en el detalle de cada cabaña y en «Cómo llegar → Antes de venir». Deja un campo
+          vacío para ocultarlo.
+        </p>
+        <div className="grid gap-5 sm:grid-cols-2">
+          {text('checkInTime', 'Hora de llegada', 'Ej.: 3:00 p. m.')}
+          {text('checkOutTime', 'Hora de salida', 'Ej.: 12:00 m.')}
+          <div className="sm:col-span-2">{text('sharedAreas', 'Zonas comunes', 'Ej.: Cocina, kiosko, parrilla y barril asador')}</div>
+          <div className="sm:col-span-2">
+            <Field label="Mascotas" htmlFor="st-pets" error={errors.petsPolicy}>
+              <textarea
+                id="st-pets"
+                rows={2}
+                value={values.petsPolicy}
+                onChange={(e) => set('petsPolicy', e.target.value)}
+                className={inputClass}
+                {...invalidProps('st-pets', errors.petsPolicy)}
+              />
+            </Field>
+          </div>
+          {lines('recommendations', 'Recomendaciones', 'Una por línea.')}
+          {lines('houseRules', 'Normas de la casa', 'Una por línea. Se muestran resaltadas en rojo.')}
+          {lines('bookingTerms', 'Condiciones de reserva', 'Una por línea, con el formato «Título: texto». Ej.: Saldo: el resto se paga al llegar.')}
+        </div>
+      </Panel>
+
+      <Panel>
         <h2 className="mb-4 text-xl">Redes sociales</h2>
         <div className="grid gap-5 sm:grid-cols-3">
           {(['instagram', 'facebook', 'tiktok'] as const).map((key) => (
@@ -193,7 +247,7 @@ export default function SettingsPage() {
   const settings = useAdminData<Settings>('settings/public');
   return (
     <>
-      <PageHeader title="Ajustes" description="WhatsApp, nombre, ubicación y redes que se muestran en el sitio." />
+      <PageHeader title="Ajustes" description="WhatsApp, nombre, ubicación, información para el huésped y redes que se muestran en el sitio." />
       {settings.status === 'loading' && <LoadingBlock />}
       {settings.status === 'error' && <ErrorBlock message={settings.error} onRetry={settings.reload} />}
       {settings.status === 'ready' && <SettingsForm settings={settings.data} onSaved={settings.mutate} />}

@@ -10,7 +10,7 @@ import { PHOTOS } from '@/lib/photos';
 
 export const metadata: Metadata = {
   title: 'Productos de la finca',
-  description: 'Miel, café, quesos y artesanías hechos en el rancho y la vereda. Agrégalos a tu solicitud.',
+  description: 'Vino artesanal amazónico y otros productos de la región. Agrégalos a tu solicitud.',
   alternates: { canonical: '/productos' },
   openGraph: { title: 'Productos de la finca · Rancho Porvenir', url: '/productos' },
 };
@@ -34,8 +34,8 @@ export default function ProductsPage() {
   return (
     <>
       <PageBanner photo={PHOTOS.picadaTerraza} position="50% 70%" eyebrow="Hecho en la finca" title="Productos">
-        Lo que producimos en el rancho y lo que hacen nuestros vecinos de la vereda. No vendemos en
-        línea: agrégalos a tu solicitud y te los tenemos listos en tu visita.
+        Vino artesanal amazónico y otros productos de la región. No vendemos en línea: agrégalos a tu
+        solicitud y te los tenemos listos en tu visita.
       </PageBanner>
       <Container className="py-12 sm:py-16">
         <SafeSection what="los productos" fallback={<CardGridSkeleton count={4} />}>

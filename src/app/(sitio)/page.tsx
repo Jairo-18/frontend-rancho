@@ -34,8 +34,8 @@ const PILLARS = [
   },
   {
     Icon: Heart,
-    title: 'Hecho para compartir',
-    text: 'Escápate en pareja, celebra algo especial o sal a cabalgar por los potreros con la montaña de fondo.',
+    title: 'Aventura y compañía',
+    text: 'Escápate en pareja o ven en grupo: camping, rutas de senderismo, fogata con masmelos y cabalgatas con la montaña de fondo.',
   },
 ];
 
@@ -243,8 +243,8 @@ export default function HomePage() {
         <Container className="grid items-center gap-12 lg:grid-cols-2">
           <div>
             <SectionHeading align="left" eyebrow="Así se vive el rancho" title="Un refugio verde para bajar el ritmo">
-              Lejos del ruido, entre árboles y montañas del Putumayo. Aquí el plan es descansar, comer
-              rico y dejar que la selva haga lo suyo.
+              Lejos del ruido, entre montañas, bosques y rutas de senderismo del Putumayo. Cabañas, camping
+              y aire puro para descansar y dejar que la selva haga lo suyo.
             </SectionHeading>
             <div className="space-y-6">
               {PILLARS.map(({ Icon, title, text }, i) => (
@@ -333,7 +333,7 @@ export default function HomePage() {
               </h2>
               <p className="mt-5 text-lg leading-relaxed text-papel/85">
                 Aniversarios, pedidas de mano o simplemente ganas de consentir a alguien. Preparamos tu
-                cabaña con pétalos, velas, globos y un buen vino, y el jacuzzi listo cuando lleguen.
+                cabaña con pétalos, velas y globos, con vino artesanal amazónico y el jacuzzi listo cuando lleguen.
               </p>
               <p className="mt-3 leading-relaxed text-papel/75">
                 Cuéntanos qué celebras y armamos la sorpresa contigo por WhatsApp.
@@ -390,7 +390,7 @@ export default function HomePage() {
       <section className="pb-20">
         <Container>
           <SectionHeading eyebrow="Hecho en la finca" title="Para llevar a casa">
-            Sabores y artesanías de la región. Agrégalos a tu solicitud y te los tenemos listos.
+            Vino artesanal amazónico y otros productos de la región. Agrégalos a tu solicitud y te los tenemos listos.
           </SectionHeading>
           <SafeSection what="los productos" fallback={<CardGridSkeleton count={4} />}>
             <FeaturedProducts />

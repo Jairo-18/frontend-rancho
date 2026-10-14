@@ -14,6 +14,15 @@ export interface Settings {
   email: string;
   phone: string;
   socials: { instagram: string; facebook: string; tiktok: string };
+  /** Información para el huésped, editable en Ajustes. */
+  checkInTime: string;
+  checkOutTime: string;
+  sharedAreas: string;
+  petsPolicy: string;
+  recommendations: string[];
+  houseRules: string[];
+  /** Cada elemento "Título: texto". */
+  bookingTerms: string[];
 }
 
 export interface RoomImage {
