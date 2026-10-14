@@ -3,70 +3,33 @@
 import { ArrowRight, CalendarDays, Check, LoaderCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
-import { addDays, formatMoney, nightsBetween, pluralize, todayInBogota } from '@/lib/format';
+import { formatMoney, nightsBetween, pluralize } from '@/lib/format';
 import { MAX_GUESTS, requestActions, useRequest } from '@/lib/request-store';
 import { useQuote } from '@/lib/use-quote';
 import type { RequestRoom } from '@/lib/whatsapp';
+import { DateRangePicker } from './date-range-picker';
 import { QuoteBreakdown } from './quote-breakdown';
 import { Stepper } from './request-buttons';
 import { buttonStyles } from './ui';
-
-const MAX_NIGHTS = 30;
-
-export function DateFields({
-  checkIn,
-  checkOut,
-  onChange,
-  idPrefix,
-}: {
-  checkIn: string;
-  checkOut: string;
-  onChange: (checkIn: string, checkOut: string) => void;
-  idPrefix: string;
-}) {
-  const today = todayInBogota();
-  const input =
-    'mt-1 w-full rounded-xl border-2 border-arena bg-papel-claro px-3 py-2.5 font-semibold text-tinta focus:border-musgo-700 focus:outline-none';
-  return (
-    <div className="grid grid-cols-2 gap-3">
-      <label htmlFor={`${idPrefix}-entrada`} className="text-sm font-bold text-tinta-suave">
-        Entrada
-        <input
-          id={`${idPrefix}-entrada`}
-          type="date"
-          className={input}
-          min={today}
-          value={checkIn}
-          onChange={(e) => {
-            const value = e.target.value;
-            // Si la salida queda antes de la entrada, se corre a la noche siguiente.
-            const out = checkOut && value && checkOut > value ? checkOut : value ? addDays(value, 1) : checkOut;
-            onChange(value, out);
-          }}
-        />
-      </label>
-      <label htmlFor={`${idPrefix}-salida`} className="text-sm font-bold text-tinta-suave">
-        Salida
-        <input
-          id={`${idPrefix}-salida`}
-          type="date"
-          className={input}
-          min={checkIn ? addDays(checkIn, 1) : addDays(today, 1)}
-          max={checkIn ? addDays(checkIn, MAX_NIGHTS) : undefined}
-          value={checkOut}
-          onChange={(e) => onChange(checkIn, e.target.value)}
-        />
-      </label>
-    </div>
-  );
-}
 
 /**
  * Calculadora del detalle de la cabaña: el elemento más claro de la página
  * (CONTEXT §7). Muestra el desglose noche por noche y permite llevar la cabaña
  * con esas fechas a "Mi solicitud".
  */
-export function PriceCalculator({ room, roomSingular }: { room: RequestRoom; roomSingular: string }) {
+export function PriceCalculator({
+  room,
+  roomSingular,
+  checkInTime,
+  checkOutTime,
+  fridayNightIsWeekend,
+}: {
+  room: RequestRoom;
+  roomSingular: string;
+  checkInTime: string;
+  checkOutTime: string;
+  fridayNightIsWeekend: boolean;
+}) {
   const selection = useRequest();
   const sameRoom = selection.room?.id === room.id;
   const [dates, setDates] = useState<{ checkIn: string; checkOut: string } | null>(null);
@@ -88,11 +51,14 @@ export function PriceCalculator({ room, roomSingular }: { room: RequestRoom; roo
       </div>
 
       <div className="space-y-5 p-5 sm:p-6">
-        <DateFields
+        <DateRangePicker
           idPrefix="calc"
           checkIn={checkIn}
           checkOut={checkOut}
           onChange={(a, b) => setDates({ checkIn: a, checkOut: b })}
+          checkInTime={checkInTime}
+          checkOutTime={checkOutTime}
+          fridayNightIsWeekend={fridayNightIsWeekend}
         />
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm font-bold text-tinta-suave">Personas</span>

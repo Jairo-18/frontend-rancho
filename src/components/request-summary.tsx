@@ -19,7 +19,7 @@ import {
 import { WhatsAppIcon } from './brand-icons';
 import { WhatsAppPreview } from './whatsapp-preview';
 import { HorseSilhouette, Leaf } from './decor';
-import { DateFields } from './price-calculator';
+import { DateRangePicker } from './date-range-picker';
 import { QuoteBreakdown } from './quote-breakdown';
 import { Stepper } from './request-buttons';
 import { buttonStyles } from './ui';
@@ -137,11 +137,14 @@ export function RequestSummary({ settings }: { settings: Settings }) {
                 </div>
                 <RemoveButton label={`Quitar ${selection.room.name}`} onClick={requestActions.removeRoom} />
               </div>
-              <DateFields
+              <DateRangePicker
                 idPrefix="solicitud"
                 checkIn={selection.checkIn ?? ''}
                 checkOut={selection.checkOut ?? ''}
                 onChange={(a, b) => requestActions.setDates(a || null, b || null)}
+                checkInTime={settings.checkInTime}
+                checkOutTime={settings.checkOutTime}
+                fridayNightIsWeekend={settings.fridayNightIsWeekend}
               />
               <div aria-live="polite">
                 {!hasDates && (

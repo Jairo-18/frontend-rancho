@@ -122,7 +122,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const brand = (
     <Link href="/admin" className="flex items-center gap-2.5">
       {settings.data?.logoUrl ? (
-        <span className="grid size-10 shrink-0 place-items-center rounded-full bg-papel-claro">
+        <span className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-white">
           <Image src={settings.data.logoUrl} alt="" width={32} height={22} className="h-auto w-8 object-contain" />
         </span>
       ) : (

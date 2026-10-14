@@ -77,6 +77,9 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
         <PriceCalculator
           roomSingular={roomSingular}
           room={{ id: room.id, slug: room.slug, name: room.name, hasJacuzzi: room.hasJacuzzi }}
+          checkInTime={settings.checkInTime}
+          checkOutTime={settings.checkOutTime}
+          fridayNightIsWeekend={settings.fridayNightIsWeekend}
         />
       </div>
     </div>
