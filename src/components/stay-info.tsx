@@ -1,5 +1,6 @@
 import { Ban, CalendarCheck, Clock, Dog, Flame, Info } from 'lucide-react';
 import type { Settings } from '@/lib/types';
+import { HashAnchor } from './hash-anchor';
 
 type StaySettings = Pick<
   Settings,
@@ -62,6 +63,7 @@ export function StayInfo({ settings }: { settings: StaySettings }) {
   const { recommendations, houseRules, bookingTerms } = settings;
   return (
     <section id="antes-de-venir" aria-labelledby="antes-de-venir-titulo" className="scroll-mt-24">
+      <HashAnchor id="antes-de-venir" />
       <p className="font-hand text-2xl text-arcilla-700 sm:text-3xl">Para que todo salga bien</p>
       <h2 id="antes-de-venir-titulo" className="mt-1 text-3xl font-semibold sm:text-4xl">
         Antes de venir
