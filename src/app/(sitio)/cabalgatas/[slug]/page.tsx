@@ -7,6 +7,7 @@ import { Gallery } from '@/components/gallery';
 import { AddHorsebackControl } from '@/components/request-buttons';
 import { RichText } from '@/components/rich-text';
 import { SectionBoundary } from '@/components/section-boundary';
+import { BreadcrumbJsonLd } from '@/components/structured-data';
 import { Container } from '@/components/ui';
 import { getHorsebackRide } from '@/lib/api';
 import { formatDuration, formatMoney } from '@/lib/format';
@@ -37,6 +38,12 @@ async function RideDetail({ params }: { params: PageProps<'/cabalgatas/[slug]'>[
 
   return (
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Cabalgatas', path: '/cabalgatas' },
+          { name: ride.name, path: `/cabalgatas/${ride.slug}` },
+        ]}
+      />
       <div className="space-y-8">
         <Gallery images={ride.images} title={ride.name} />
         <div>

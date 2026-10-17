@@ -7,10 +7,12 @@ import { Gallery } from '@/components/gallery';
 import { AddProductButton } from '@/components/request-buttons';
 import { RichText } from '@/components/rich-text';
 import { SectionBoundary } from '@/components/section-boundary';
+import { BreadcrumbJsonLd, JsonLd } from '@/components/structured-data';
 import { Container } from '@/components/ui';
 import { getProduct } from '@/lib/api';
 import { formatMoney } from '@/lib/format';
 import { toPlainText } from '@/lib/rich-text';
+import { siteUrl } from '@/lib/site';
 
 export async function generateMetadata({ params }: PageProps<'/productos/[slug]'>): Promise<Metadata> {
   const { slug } = await params;
@@ -34,9 +36,33 @@ async function ProductDetail({ params }: { params: PageProps<'/productos/[slug]'
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();
+  const url = `${siteUrl()}/productos/${product.slug}`;
 
   return (
     <div className="grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start">
+      <BreadcrumbJsonLd
+        items={[
+          { name: 'Productos', path: '/productos' },
+          { name: product.name, path: `/productos/${product.slug}` },
+        ]}
+      />
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'Product',
+          name: product.name,
+          description: toPlainText(product.description),
+          ...(product.imageUrl && { image: product.imageUrl }),
+          url,
+          offers: {
+            '@type': 'Offer',
+            price: product.price,
+            priceCurrency: 'COP',
+            availability: 'https://schema.org/InStock',
+            url,
+          },
+        }}
+      />
       <div className="mx-auto w-full max-w-xl">
         {product.imageUrl && <Gallery images={[{ id: product.id, url: product.imageUrl }]} title={product.name} />}
       </div>

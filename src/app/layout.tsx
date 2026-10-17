@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Caveat, Fraunces, Nunito } from 'next/font/google';
+import { SITE_NAME, siteUrl } from '@/lib/site';
 import './globals.css';
 
 /** Títulos: serif orgánica (con cursiva para acentos). */
@@ -14,13 +15,12 @@ const nunito = Nunito({ variable: '--font-nunito', subsets: ['latin'] });
 /** Solo detalles decorativos, nunca texto largo. */
 const caveat = Caveat({ variable: '--font-caveat', subsets: ['latin'], weight: ['500', '700'] });
 
-const SITE_URL = process.env.SITE_URL ?? 'http://localhost:3000';
-const SITE_NAME = 'Rancho Porvenir';
 const DESCRIPTION =
   'Cabañas de madera entre la selva de Mocoa, Putumayo: jacuzzi, cabalgatas, planes románticos y productos de la finca. Arma tu plan y consúltalo por WhatsApp.';
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
+  // Valor de compilación: el sitio público lo reemplaza por petición en (sitio)/layout.
+  metadataBase: new URL(siteUrl()),
   title: { default: `${SITE_NAME} · Cabañas en la selva de Mocoa`, template: `%s · ${SITE_NAME}` },
   description: DESCRIPTION,
   applicationName: SITE_NAME,

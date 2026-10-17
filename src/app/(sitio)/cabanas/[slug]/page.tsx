@@ -9,6 +9,7 @@ import { PriceCalculator } from '@/components/price-calculator';
 import { RichText } from '@/components/rich-text';
 import { SectionBoundary } from '@/components/section-boundary';
 import { StayFacts } from '@/components/stay-info';
+import { BreadcrumbJsonLd } from '@/components/structured-data';
 import { CapacityBadge, cardGrid, Container, JacuzziBadge, PricePair } from '@/components/ui';
 import { getRoom, getSettings } from '@/lib/api';
 import { singularLabel } from '@/lib/format';
@@ -42,6 +43,12 @@ async function RoomDetail({ params }: { params: PageProps<'/cabanas/[slug]'>['pa
     // Tres bloques: en el celular la calculadora queda justo después de los
     // precios (no al final); en escritorio va fija a la derecha.
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
+      <BreadcrumbJsonLd
+        items={[
+          { name: settings.roomLabel, path: '/cabanas' },
+          { name: room.name, path: `/cabanas/${room.slug}` },
+        ]}
+      />
       <div className="space-y-8 lg:col-start-1 lg:row-start-1">
         <Gallery images={room.images} title={room.name} />
         <div>

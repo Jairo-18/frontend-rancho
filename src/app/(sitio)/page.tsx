@@ -1,4 +1,5 @@
 import { ArrowRight, Heart, MapPin, Moon, Trees } from 'lucide-react';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { connection } from 'next/server';
@@ -7,6 +8,7 @@ import { AmbientVideo } from '@/components/ambient-video';
 import { WhatsAppIcon } from '@/components/brand-icons';
 import { HorsebackCard, ProductCard, RoomCard } from '@/components/cards';
 import { CanopyEdge } from '@/components/decor';
+import { LodgingJsonLd } from '@/components/structured-data';
 import { Reveal } from '@/components/reveal';
 import { RoomLabelText, SafeSection } from '@/components/safe-section';
 import {
@@ -188,9 +190,16 @@ async function LocationBlurb() {
   );
 }
 
+export const metadata: Metadata = {
+  alternates: { canonical: '/' },
+};
+
 export default function HomePage() {
   return (
     <>
+      <Suspense>
+        <LodgingJsonLd />
+      </Suspense>
       {/* Hero: foto a pantalla completa en móvil, collage en escritorio */}
       <section className="follaje relative isolate overflow-hidden">
         <Image

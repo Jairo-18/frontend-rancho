@@ -1,11 +1,11 @@
 import type { MetadataRoute } from 'next';
 import { connection } from 'next/server';
 import { getHorsebackRides, getProducts, getRooms } from '@/lib/api';
-
-const SITE_URL = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
+import { siteUrl } from '@/lib/site';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
+  const SITE_URL = siteUrl();
   const pages = ['', '/cabanas', '/cabalgatas', '/productos', '/contacto'].map((path) => ({
     url: `${SITE_URL}${path}`,
     changeFrequency: 'weekly' as const,

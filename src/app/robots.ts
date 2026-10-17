@@ -1,10 +1,11 @@
 import type { MetadataRoute } from 'next';
+import { connection } from 'next/server';
+import { siteUrl } from '@/lib/site';
 
-const SITE_URL = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/+$/, '');
-
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  await connection();
   return {
     rules: { userAgent: '*', allow: '/', disallow: ['/admin', '/api/', '/solicitud'] },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: `${siteUrl()}/sitemap.xml`,
   };
 }
